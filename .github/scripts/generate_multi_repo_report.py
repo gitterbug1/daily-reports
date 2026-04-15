@@ -78,20 +78,35 @@ def get_jobs_for_run(repo: str, run_id: int) -> List[Dict]:
         print(f"❌ Error fetching jobs for run {run_id}: {e}")
         return []
 
+import requests
+import zipfile
+import io
+
 def get_job_logs(repo: str, job_id: int) -> str:
     url = f"https://api.github.com/repos/{repo}/actions/jobs/{job_id}/logs"
 
     try:
-        response = requests.get(url, headers=headers, timeout=20)
+        response = requests.get(url, headers=headers, allow_redirects=False, timeout=20)
 
-        if response.status_code != 200:
+        # Step 1: Get redirect URL
+        if response.status_code == 302:
+            download_url = response.headers.get("Location")
+
+            if not download_url:
+                return ""
+
+            # Step 2: Download actual ZIP
+            zip_response = requests.get(download_url, timeout=20)
+
+            with zipfile.ZipFile(io.BytesIO(zip_response.content)) as z:
+                logs = ""
+                for file in z.namelist():
+                    logs += z.read(file).decode("utf-8", errors="ignore")
+                return logs
+
+        else:
+            print(f"⚠️ Unexpected status {response.status_code} for logs")
             return ""
-
-        with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-            logs = ""
-            for file in z.namelist():
-                logs += z.read(file).decode("utf-8", errors="ignore")
-            return logs
 
     except Exception as e:
         print(f"❌ Error fetching logs for job {job_id}: {e}")
