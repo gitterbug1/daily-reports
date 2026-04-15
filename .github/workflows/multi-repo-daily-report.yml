@@ -2,8 +2,11 @@ name: Daily Multi-Repo Upload Report
 
 on:
   schedule:
-    - cron: '0 0 * * *' # runs daily at midnight UTC
+    - cron: '0 0 * * *' # daily at midnight UTC
   workflow_dispatch:
+
+permissions:
+  contents: write   # required for GitHub Pages
 
 jobs:
   upload_report:
@@ -19,15 +22,24 @@ jobs:
           python-version: '3.11'
 
       - name: 📦 Install dependencies
-        run: pip install requests
+        run: |
+          pip install requests markdown
 
-      - name: 📊 Generate report
+      - name: 📊 Generate report (HTML + data)
         run: python .github/scripts/generate_multi_repo_report.py
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
+      # (Optional but useful)
       - name: 📁 Upload report artifact
         uses: actions/upload-artifact@v4
         with:
           name: daily-upload-report
-          path: reports/*.md
+          path: site/index.html
+
+      # 🚀 Deploy to GitHub Pages
+      - name: 🌐 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site

@@ -2,7 +2,9 @@ import os
 import requests
 import zipfile
 import io
-from datetime import datetime, timedelta, UTC
+import re
+from datetime import datetime, timedelta, UTC, timezone
+from zoneinfo import ZoneInfo
 from typing import Dict, List
 
 # ========================
@@ -45,23 +47,14 @@ def get_repo_display_name(repo: str) -> str:
 
 def get_workflow_runs(repo: str, hours: int = 24) -> List[Dict]:
     url = f"https://api.github.com/repos/{repo}/actions/runs"
-
     since = (now_utc() - timedelta(hours=hours)).isoformat()
 
-    params = {
-        "created": f">={since}",
-        "per_page": 50
-    }
+    params = {"created": f">={since}", "per_page": 50}
 
     try:
         response = requests.get(url, headers=headers, params=params, timeout=15)
-
-        if response.status_code == 401:
-            raise Exception("401 Unauthorized → Check your GITHUB_TOKEN permissions")
-
         response.raise_for_status()
         return response.json().get("workflow_runs", [])
-
     except Exception as e:
         print(f"❌ Error fetching runs for {repo}: {e}")
         return []
@@ -73,30 +66,22 @@ def get_jobs_for_run(repo: str, run_id: int) -> List[Dict]:
         response = requests.get(url, headers=headers, timeout=15)
         response.raise_for_status()
         return response.json().get("jobs", [])
-
     except Exception as e:
-        print(f"❌ Error fetching jobs for run {run_id}: {e}")
+        print(f"❌ Error fetching jobs: {e}")
         return []
-
-import requests
-import zipfile
-import io
 
 def get_job_logs(repo: str, job_id: int) -> str:
     url = f"https://api.github.com/repos/{repo}/actions/jobs/{job_id}/logs"
 
     try:
-        response = requests.get(url, headers=headers, timeout=20, allow_redirects=True)
+        response = requests.get(url, headers=headers, timeout=20)
 
         if response.status_code != 200:
-            print(f"⚠️ Failed to fetch logs: {response.status_code}")
             return ""
 
         content = response.content
 
-        # -----------------------
-        # CASE 1: ZIP file
-        # -----------------------
+        # ZIP logs
         if content.startswith(b'PK'):
             with zipfile.ZipFile(io.BytesIO(content)) as z:
                 logs = ""
@@ -104,143 +89,63 @@ def get_job_logs(repo: str, job_id: int) -> str:
                     logs += z.read(file).decode("utf-8", errors="ignore")
                 return logs
 
-        # -----------------------
-        # CASE 2: Plain text logs (YOUR CASE)
-        # -----------------------
-        else:
-            return content.decode("utf-8", errors="ignore")
+        # Plain logs
+        return content.decode("utf-8", errors="ignore")
 
     except Exception as e:
-        print(f"❌ Error fetching logs for job {job_id}: {e}")
+        print(f"❌ Error fetching logs: {e}")
         return ""
 
-import re
-from datetime import datetime
-
-from datetime import datetime, timezone
-from zoneinfo import ZoneInfo  # Python 3.9+
+# ========================
+# PARSING
+# ========================
 
 def extract_post_details(logs: str):
-    import re
-
     logs_lower = logs.lower()
 
-    # -------------------
-    # SURAH + AYAH
-    # -------------------
+    # Surah:Ayah
     match = re.search(r"surah (\d+), ayah (\d+)", logs_lower)
-    if match:
-        sa = f"{match.group(1)}:{match.group(2)}"
-    else:
-        sa = "?"
+    sa = f"{match.group(1)}:{match.group(2)}" if match else "?"
 
-    # -------------------
-    # TIME → IST
-    # -------------------
+    # Time → IST
     time_match = re.search(r"\d{4}-\d{2}-\d{2}t\d{2}:\d{2}:\d{2}", logs_lower)
 
     if time_match:
         try:
-            # Parse as UTC
             dt_utc = datetime.fromisoformat(time_match.group(0)).replace(tzinfo=timezone.utc)
-
-            # Convert to IST
             dt_ist = dt_utc.astimezone(ZoneInfo("Asia/Kolkata"))
-
-            time_formatted = dt_ist.strftime("%H:%M IST")
+            time_str = dt_ist.strftime("%H:%M IST")
         except:
-            time_formatted = "?"
+            time_str = "?"
     else:
-        time_formatted = "?"
+        time_str = "?"
 
-    return sa, time_formatted
+    return sa, time_str
 
 # ========================
-# LOG ANALYSIS
+# ANALYSIS
 # ========================
 
 def analyze_logs_arabic(logs: str):
-    if not logs:
-        return {
-            "instagram": "⚠️ UNKNOWN",
-            "facebook": "⚠️ UNKNOWN",
-            "youtube": "⚠️ UNKNOWN"
-        }
-
     logs_lower = logs.lower()
 
-    # -------------------
-    # INSTAGRAM (Arabic)
-    # -------------------
-    if "successfully uploaded video to instagram" in logs_lower:
-        ig = "✅ SUCCESS"
-    elif "instagram" in logs_lower and "error" in logs_lower:
-        ig = "❌ FAILED"
-    else:
-        ig = "⚠️ UNKNOWN"
+    ig = "✅ SUCCESS" if "successfully uploaded video to instagram" in logs_lower else "❌ FAILED" if "instagram" in logs_lower and "error" in logs_lower else "⚠️ UNKNOWN"
+    fb = "✅ SUCCESS" if "facebook page upload successful" in logs_lower else "❌ FAILED" if "facebook" in logs_lower and "error" in logs_lower else "⚠️ UNKNOWN"
+    yt = "✅ SUCCESS" if "upload complete! video id" in logs_lower else "❌ FAILED" if "invalid_grant" in logs_lower else "⚠️ UNKNOWN"
 
-    # -------------------
-    # FACEBOOK (Arabic)
-    # -------------------
-    if "facebook page upload successful" in logs_lower:
-        fb = "✅ SUCCESS"
-    elif "facebook page upload failed" in logs_lower or ("facebook" in logs_lower and "error" in logs_lower):
-        fb = "❌ FAILED"
-    else:
-        fb = "⚠️ UNKNOWN"
-
-    # -------------------
-    # YOUTUBE (Arabic)
-    # -------------------
-    if "upload complete! video id" in logs_lower:
-        yt = "✅ SUCCESS"
-    elif "invalid_grant" in logs_lower or "refresherror" in logs_lower:
-        yt = "❌ FAILED"
-    elif "youtube" in logs_lower and "error" in logs_lower:
-        yt = "❌ FAILED"
-    else:
-        yt = "⚠️ UNKNOWN"
-
-    return {
-        "instagram": ig,
-        "facebook": fb,
-        "youtube": yt
-    }
+    return {"instagram": ig, "facebook": fb, "youtube": yt}
 
 def analyze_logs(logs: str):
     logs_lower = logs.lower()
 
-    # Instagram
-    if "instagram graph api validated" in logs_lower:
-        ig = "✅ SUCCESS"
-    else:
-        ig = "⚠️ UNKNOWN"
+    ig = "✅ SUCCESS" if "instagram graph api validated" in logs_lower else "⚠️ UNKNOWN"
+    fb = "❌ FAILED" if "facebook" in logs_lower and "error" in logs_lower else "✅ SUCCESS" if "facebook" in logs_lower else "⚠️ UNKNOWN"
+    yt = "❌ FAILED" if "invalid_grant" in logs_lower else "✅ SUCCESS" if "youtube" in logs_lower else "⚠️ UNKNOWN"
 
-    # Facebook
-    if "facebook" in logs_lower and "error" in logs_lower:
-        fb = "❌ FAILED"
-    elif "facebook" in logs_lower:
-        fb = "✅ SUCCESS"
-    else:
-        fb = "⚠️ UNKNOWN"
+    return {"instagram": ig, "facebook": fb, "youtube": yt}
 
-    # YouTube
-    if "invalid_grant" in logs_lower:
-        yt = "❌ FAILED"
-    elif "youtube" in logs_lower and "error" in logs_lower:
-        yt = "❌ FAILED"
-    elif "youtube" in logs_lower:
-        yt = "✅ SUCCESS"
-    else:
-        yt = "⚠️ UNKNOWN"
-
-    return {
-        "instagram": ig,
-        "facebook": fb,
-        "youtube": yt
-    }
 # ========================
-# REPORT GENERATION
+# REPORT
 # ========================
 
 def generate_repo_report(repo: str) -> str:
@@ -248,7 +153,7 @@ def generate_repo_report(repo: str) -> str:
     runs = get_workflow_runs(repo)
 
     if not runs:
-        return f"\n### {display_name}\n\nNo workflow runs in the last 24 hours.\n"
+        return f"\n### {display_name}\n\nNo workflow runs.\n"
 
     report = f"\n### {display_name}\n\n"
     report += "| Run # | Status | Date | S:A | Time | Instagram | Facebook | YouTube | Link |\n"
@@ -262,38 +167,30 @@ def generate_repo_report(repo: str) -> str:
 
         jobs = get_jobs_for_run(repo, run_id)
 
-        ig_status = "⚠️"
-        fb_status = "⚠️"
-        yt_status = "⚠️"
-        sa = "?"
-        time_posted = "?"
+        ig = fb = yt = "⚠️"
+        sa = time_posted = "?"
 
         for job in jobs:
             logs = get_job_logs(repo, job["id"])
-
             if not logs:
                 continue
 
-            # Extract Surah:Ayah and time
-            sa, time_posted = extract_post_details(logs)
+            if sa == "?":
+                sa, time_posted = extract_post_details(logs)
 
-            # Analyze platform status
-            if repo == "iwilllearnquran/learnqurandaily":
-                analysis = analyze_logs_arabic(logs)
-            else:
-                analysis = analyze_logs(logs)
+            analysis = analyze_logs_arabic(logs) if repo == "iwilllearnquran/learnqurandaily" else analyze_logs(logs)
 
-            ig_status = analysis["instagram"]
-            fb_status = analysis["facebook"]
-            yt_status = analysis["youtube"]
+            ig = analysis["instagram"]
+            fb = analysis["facebook"]
+            yt = analysis["youtube"]
 
         link = f"https://github.com/{repo}/actions/runs/{run_id}"
 
-        report += f"| #{run_number} | {status} | {created_at} | {sa} | {time_posted} | {ig_status} | {fb_status} | {yt_status} | [View]({link}) |\n"
-    
+        report += f"| #{run_number} | {status} | {created_at} | {sa} | {time_posted} | {ig} | {fb} | {yt} | [View]({link}) |\n"
+
     return report
 
-def generate_full_report() -> str:
+def generate_full_report():
     report = "# 📊 Daily Upload Report\n\n"
     report += f"**Generated:** {now_utc().strftime('%Y-%m-%d %H:%M UTC')}\n"
     report += f"**Repositories:** {len(REPOS)}\n"
@@ -301,23 +198,57 @@ def generate_full_report() -> str:
     for repo in REPOS:
         report += generate_repo_report(repo)
 
-    report += "\n### Legend\n\n"
-    report += "- ✅ SUCCESS: Upload completed\n"
-    report += "- ❌ FAILED: Upload failed\n"
-    report += "- ⚠️ UNKNOWN: Could not determine\n"
-
     return report
 
+# ========================
+# HTML CONVERSION
+# ========================
+
+def markdown_to_html(md: str):
+    import markdown
+
+    body = markdown.markdown(md, extensions=["tables"])
+
+    return f"""
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial;
+                background: #0f172a;
+                color: white;
+                padding: 20px;
+            }}
+            table {{
+                border-collapse: collapse;
+                width: 100%;
+            }}
+            th, td {{
+                border: 1px solid #334155;
+                padding: 8px;
+                text-align: center;
+            }}
+            th {{
+                background: #1e293b;
+            }}
+        </style>
+    </head>
+    <body>
+        <h2>📊 Daily Upload Report</h2>
+        {body}
+    </body>
+    </html>
+    """
+
 def save_report(report: str):
-    os.makedirs("reports", exist_ok=True)
+    os.makedirs("site", exist_ok=True)
 
-    date_str = now_utc().strftime("%Y-%m-%d")
-    path = f"reports/report-{date_str}.md"
+    html = markdown_to_html(report)
 
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(report)
+    with open("site/index.html", "w", encoding="utf-8") as f:
+        f.write(html)
 
-    print(f"✅ Report saved to {path}")
+    print("✅ HTML report generated")
 
 # ========================
 # MAIN
