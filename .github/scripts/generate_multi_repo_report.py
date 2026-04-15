@@ -41,6 +41,8 @@ def get_workflow_runs(repo: str, hours: int = 24) -> List[Dict]:
     try:
         response = requests.get(url, headers=headers, params=params, timeout=10)
         response.raise_for_status()
+        print(url)
+        print(response)
         return response.json().get("workflow_runs", [])
     except Exception as e:
         print(f"Error fetching runs for {repo}: {str(e)}")
