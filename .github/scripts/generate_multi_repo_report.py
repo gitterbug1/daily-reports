@@ -86,7 +86,6 @@ def get_job_logs(repo: str, job_id: int) -> str:
     url = f"https://api.github.com/repos/{repo}/actions/jobs/{job_id}/logs"
 
     try:
-        # Step 1: request logs (allow redirects automatically)
         response = requests.get(url, headers=headers, timeout=20, allow_redirects=True)
 
         if response.status_code != 200:
@@ -95,19 +94,21 @@ def get_job_logs(repo: str, job_id: int) -> str:
 
         content = response.content
 
-        # Step 2: Check if it's actually a ZIP file
-        if not content.startswith(b'PK'):
-            # Debug print first 200 chars
-            preview = content[:200].decode(errors="ignore")
-            print(f"⚠️ Not ZIP for job {job_id}. Response preview:\n{preview}\n")
-            return ""
+        # -----------------------
+        # CASE 1: ZIP file
+        # -----------------------
+        if content.startswith(b'PK'):
+            with zipfile.ZipFile(io.BytesIO(content)) as z:
+                logs = ""
+                for file in z.namelist():
+                    logs += z.read(file).decode("utf-8", errors="ignore")
+                return logs
 
-        # Step 3: Extract ZIP safely
-        with zipfile.ZipFile(io.BytesIO(content)) as z:
-            logs = ""
-            for file in z.namelist():
-                logs += z.read(file).decode("utf-8", errors="ignore")
-            return logs
+        # -----------------------
+        # CASE 2: Plain text logs (YOUR CASE)
+        # -----------------------
+        else:
+            return content.decode("utf-8", errors="ignore")
 
     except Exception as e:
         print(f"❌ Error fetching logs for job {job_id}: {e}")
@@ -118,44 +119,29 @@ def get_job_logs(repo: str, job_id: int) -> str:
 # ========================
 
 def analyze_logs(logs: str):
-    if not logs:
-        return {
-            "instagram": "⚠️ UNKNOWN",
-            "facebook": "⚠️ UNKNOWN",
-            "youtube": "⚠️ UNKNOWN"
-        }
-
     logs_lower = logs.lower()
 
-    # -------------------
-    # INSTAGRAM
-    # -------------------
+    # Instagram
     if "instagram graph api validated" in logs_lower:
         ig = "✅ SUCCESS"
-    elif "instagram" in logs_lower and "error" in logs_lower:
-        ig = "❌ FAILED"
     else:
         ig = "⚠️ UNKNOWN"
 
-    # -------------------
-    # FACEBOOK
-    # -------------------
-    if "facebook uploaded" in logs_lower:
-        fb = "✅ SUCCESS"
-    elif "facebook" in logs_lower and "error" in logs_lower:
+    # Facebook
+    if "facebook" in logs_lower and "error" in logs_lower:
         fb = "❌ FAILED"
+    elif "facebook" in logs_lower:
+        fb = "✅ SUCCESS"
     else:
         fb = "⚠️ UNKNOWN"
 
-    # -------------------
-    # YOUTUBE
-    # -------------------
-    if "youtube upload successful" in logs_lower:
-        yt = "✅ SUCCESS"
-    elif "invalid_grant" in logs_lower or "refresherror" in logs_lower:
+    # YouTube
+    if "invalid_grant" in logs_lower:
         yt = "❌ FAILED"
     elif "youtube" in logs_lower and "error" in logs_lower:
         yt = "❌ FAILED"
+    elif "youtube" in logs_lower:
+        yt = "✅ SUCCESS"
     else:
         yt = "⚠️ UNKNOWN"
 
@@ -164,7 +150,6 @@ def analyze_logs(logs: str):
         "facebook": fb,
         "youtube": yt
     }
-
 # ========================
 # REPORT GENERATION
 # ========================
