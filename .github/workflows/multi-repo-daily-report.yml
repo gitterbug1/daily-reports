@@ -3,7 +3,7 @@ name: Daily Multi-Repo Upload Report
 on:
   schedule:
     - cron: '0 0 * * *' # Runs daily at midnight UTC
-
+  workflow_dispatch: # Allows you to run it manually for testing
 jobs:
   upload_report:
     runs-on: ubuntu-latest
