@@ -117,7 +117,12 @@ def get_job_logs(repo: str, job_id: int) -> str:
 import re
 from datetime import datetime
 
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo  # Python 3.9+
+
 def extract_post_details(logs: str):
+    import re
+
     logs_lower = logs.lower()
 
     # -------------------
@@ -125,23 +130,26 @@ def extract_post_details(logs: str):
     # -------------------
     match = re.search(r"surah (\d+), ayah (\d+)", logs_lower)
     if match:
-        surah = match.group(1)
-        ayah = match.group(2)
-        sa = f"{surah}:{ayah}"
+        sa = f"{match.group(1)}:{match.group(2)}"
     else:
         sa = "?"
 
     # -------------------
-    # TIME (first timestamp)
+    # TIME → IST
     # -------------------
     time_match = re.search(r"\d{4}-\d{2}-\d{2}t\d{2}:\d{2}:\d{2}", logs_lower)
+
     if time_match:
-        time_str = time_match.group(0)
         try:
-            dt = datetime.fromisoformat(time_str)
-            time_formatted = dt.strftime("%H:%M UTC")
+            # Parse as UTC
+            dt_utc = datetime.fromisoformat(time_match.group(0)).replace(tzinfo=timezone.utc)
+
+            # Convert to IST
+            dt_ist = dt_utc.astimezone(ZoneInfo("Asia/Kolkata"))
+
+            time_formatted = dt_ist.strftime("%H:%M IST")
         except:
-            time_formatted = time_str
+            time_formatted = "?"
     else:
         time_formatted = "?"
 
