@@ -114,9 +114,90 @@ def get_job_logs(repo: str, job_id: int) -> str:
         print(f"❌ Error fetching logs for job {job_id}: {e}")
         return ""
 
+import re
+from datetime import datetime
+
+def extract_post_details(logs: str):
+    logs_lower = logs.lower()
+
+    # -------------------
+    # SURAH + AYAH
+    # -------------------
+    match = re.search(r"surah (\d+), ayah (\d+)", logs_lower)
+    if match:
+        surah = match.group(1)
+        ayah = match.group(2)
+        sa = f"{surah}:{ayah}"
+    else:
+        sa = "?"
+
+    # -------------------
+    # TIME (first timestamp)
+    # -------------------
+    time_match = re.search(r"\d{4}-\d{2}-\d{2}t\d{2}:\d{2}:\d{2}", logs_lower)
+    if time_match:
+        time_str = time_match.group(0)
+        try:
+            dt = datetime.fromisoformat(time_str)
+            time_formatted = dt.strftime("%H:%M UTC")
+        except:
+            time_formatted = time_str
+    else:
+        time_formatted = "?"
+
+    return sa, time_formatted
+
 # ========================
 # LOG ANALYSIS
 # ========================
+
+def analyze_logs_arabic(logs: str):
+    if not logs:
+        return {
+            "instagram": "⚠️ UNKNOWN",
+            "facebook": "⚠️ UNKNOWN",
+            "youtube": "⚠️ UNKNOWN"
+        }
+
+    logs_lower = logs.lower()
+
+    # -------------------
+    # INSTAGRAM (Arabic)
+    # -------------------
+    if "successfully uploaded video to instagram" in logs_lower:
+        ig = "✅ SUCCESS"
+    elif "instagram" in logs_lower and "error" in logs_lower:
+        ig = "❌ FAILED"
+    else:
+        ig = "⚠️ UNKNOWN"
+
+    # -------------------
+    # FACEBOOK (Arabic)
+    # -------------------
+    if "facebook page upload successful" in logs_lower:
+        fb = "✅ SUCCESS"
+    elif "facebook page upload failed" in logs_lower or ("facebook" in logs_lower and "error" in logs_lower):
+        fb = "❌ FAILED"
+    else:
+        fb = "⚠️ UNKNOWN"
+
+    # -------------------
+    # YOUTUBE (Arabic)
+    # -------------------
+    if "upload complete! video id" in logs_lower:
+        yt = "✅ SUCCESS"
+    elif "invalid_grant" in logs_lower or "refresherror" in logs_lower:
+        yt = "❌ FAILED"
+    elif "youtube" in logs_lower and "error" in logs_lower:
+        yt = "❌ FAILED"
+    else:
+        yt = "⚠️ UNKNOWN"
+
+    return {
+        "instagram": ig,
+        "facebook": fb,
+        "youtube": yt
+    }
 
 def analyze_logs(logs: str):
     logs_lower = logs.lower()
@@ -162,8 +243,8 @@ def generate_repo_report(repo: str) -> str:
         return f"\n### {display_name}\n\nNo workflow runs in the last 24 hours.\n"
 
     report = f"\n### {display_name}\n\n"
-    report += "| Run # | Status | Date | Instagram | Facebook | YouTube | Link |\n"
-    report += "|-------|--------|------|-----------|----------|---------|------|\n"
+    report += "| Run # | Status | Date | S:A | Time | Instagram | Facebook | YouTube | Link |\n"
+    report += "|-------|--------|------|-----|------|-----------|----------|---------|------|\n"
 
     for run in runs[:10]:
         run_id = run["id"]
@@ -173,33 +254,35 @@ def generate_repo_report(repo: str) -> str:
 
         jobs = get_jobs_for_run(repo, run_id)
 
-        ig_status = "⚠️ UNKNOWN"
-        fb_status = "⚠️ UNKNOWN"
-        yt_status = "⚠️ UNKNOWN"
+        ig_status = "⚠️"
+        fb_status = "⚠️"
+        yt_status = "⚠️"
+        sa = "?"
+        time_posted = "?"
 
         for job in jobs:
             logs = get_job_logs(repo, job["id"])
-            analysis = analyze_logs(logs)
 
-            if analysis["instagram"] == "❌ FAILED":
-                ig_status = "❌ FAILED"
-            elif ig_status != "❌ FAILED":
-                ig_status = analysis["instagram"]
+            if not logs:
+                continue
 
-            if analysis["facebook"] == "❌ FAILED":
-                fb_status = "❌ FAILED"
-            elif fb_status != "❌ FAILED":
-                fb_status = analysis["facebook"]
+            # Extract Surah:Ayah and time
+            sa, time_posted = extract_post_details(logs)
 
-            if analysis["youtube"] == "❌ FAILED":
-                yt_status = "❌ FAILED"
-            elif yt_status != "❌ FAILED":
-                yt_status = analysis["youtube"]
+            # Analyze platform status
+            if repo == "iwilllearnquran/learnqurandaily":
+                analysis = analyze_logs_arabic(logs)
+            else:
+                analysis = analyze_logs(logs)
+
+            ig_status = analysis["instagram"]
+            fb_status = analysis["facebook"]
+            yt_status = analysis["youtube"]
 
         link = f"https://github.com/{repo}/actions/runs/{run_id}"
 
-        report += f"| #{run_number} | {status} | {created_at} | {ig_status} | {fb_status} | {yt_status} | [View]({link}) |\n"
-
+        report += f"| #{run_number} | {status} | {created_at} | {sa} | {time_posted} | {ig_status} | {fb_status} | {yt_status} | [View]({link}) |\n"
+    
     return report
 
 def generate_full_report() -> str:
