@@ -101,16 +101,52 @@ def get_job_logs(repo: str, job_id: int) -> str:
 # LOG ANALYSIS
 # ========================
 
-def analyze_logs(logs: str) -> Dict[str, str]:
+def analyze_logs(logs: str):
     if not logs:
-        return {"instagram": "⚠️ UNKNOWN", "facebook": "⚠️ UNKNOWN", "youtube": "⚠️ UNKNOWN"}
+        return {
+            "instagram": "⚠️ UNKNOWN",
+            "facebook": "⚠️ UNKNOWN",
+            "youtube": "⚠️ UNKNOWN"
+        }
 
     logs_lower = logs.lower()
 
+    # -------------------
+    # INSTAGRAM
+    # -------------------
+    if "instagram graph api validated" in logs_lower:
+        ig = "✅ SUCCESS"
+    elif "instagram" in logs_lower and "error" in logs_lower:
+        ig = "❌ FAILED"
+    else:
+        ig = "⚠️ UNKNOWN"
+
+    # -------------------
+    # FACEBOOK
+    # -------------------
+    if "facebook uploaded" in logs_lower:
+        fb = "✅ SUCCESS"
+    elif "facebook" in logs_lower and "error" in logs_lower:
+        fb = "❌ FAILED"
+    else:
+        fb = "⚠️ UNKNOWN"
+
+    # -------------------
+    # YOUTUBE
+    # -------------------
+    if "youtube upload successful" in logs_lower:
+        yt = "✅ SUCCESS"
+    elif "invalid_grant" in logs_lower or "refresherror" in logs_lower:
+        yt = "❌ FAILED"
+    elif "youtube" in logs_lower and "error" in logs_lower:
+        yt = "❌ FAILED"
+    else:
+        yt = "⚠️ UNKNOWN"
+
     return {
-        "instagram": "✅ SUCCESS" if "successfully uploaded video to instagram" in logs_lower else "❌ FAILED",
-        "facebook": "✅ SUCCESS" if "facebook uploaded" in logs_lower else "❌ FAILED",
-        "youtube": "✅ SUCCESS" if "youtube upload successful" in logs_lower else "❌ FAILED"
+        "instagram": ig,
+        "facebook": fb,
+        "youtube": yt
     }
 
 # ========================
