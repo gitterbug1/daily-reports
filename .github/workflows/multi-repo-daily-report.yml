@@ -9,18 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Generate report
-        run: |
-          echo 'Generating report for multi-repo uploads...'
-
-          # Placeholder for the report generation logic
-          DATE=$(date '+%Y-%m-%d')
-          echo "Report generated on: $DATE" > report.txt
+        run: python .github/scripts/generate_multi_repo_report.py
 
       - name: Upload report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: daily-upload-report
           path: report.txt
