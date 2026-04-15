@@ -2,23 +2,32 @@ name: Daily Multi-Repo Upload Report
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs daily at midnight UTC
-  workflow_dispatch: # Allows you to run it manually for testing
+    - cron: '0 0 * * *' # runs daily at midnight UTC
+  workflow_dispatch:
+
 jobs:
   upload_report:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-      - name: Generate report
+      - name: 📦 Install dependencies
+        run: pip install requests
+
+      - name: 📊 Generate report
         run: python .github/scripts/generate_multi_repo_report.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
-      - name: Upload report
+      - name: 📁 Upload report artifact
         uses: actions/upload-artifact@v4
         with:
           name: daily-upload-report
-          path: report.txt
+          path: reports/*.md
