@@ -86,27 +86,28 @@ def get_job_logs(repo: str, job_id: int) -> str:
     url = f"https://api.github.com/repos/{repo}/actions/jobs/{job_id}/logs"
 
     try:
-        response = requests.get(url, headers=headers, allow_redirects=False, timeout=20)
+        # Step 1: request logs (allow redirects automatically)
+        response = requests.get(url, headers=headers, timeout=20, allow_redirects=True)
 
-        # Step 1: Get redirect URL
-        if response.status_code == 302:
-            download_url = response.headers.get("Location")
-
-            if not download_url:
-                return ""
-
-            # Step 2: Download actual ZIP
-            zip_response = requests.get(download_url, timeout=20)
-
-            with zipfile.ZipFile(io.BytesIO(zip_response.content)) as z:
-                logs = ""
-                for file in z.namelist():
-                    logs += z.read(file).decode("utf-8", errors="ignore")
-                return logs
-
-        else:
-            print(f"⚠️ Unexpected status {response.status_code} for logs")
+        if response.status_code != 200:
+            print(f"⚠️ Failed to fetch logs: {response.status_code}")
             return ""
+
+        content = response.content
+
+        # Step 2: Check if it's actually a ZIP file
+        if not content.startswith(b'PK'):
+            # Debug print first 200 chars
+            preview = content[:200].decode(errors="ignore")
+            print(f"⚠️ Not ZIP for job {job_id}. Response preview:\n{preview}\n")
+            return ""
+
+        # Step 3: Extract ZIP safely
+        with zipfile.ZipFile(io.BytesIO(content)) as z:
+            logs = ""
+            for file in z.namelist():
+                logs += z.read(file).decode("utf-8", errors="ignore")
+            return logs
 
     except Exception as e:
         print(f"❌ Error fetching logs for job {job_id}: {e}")
