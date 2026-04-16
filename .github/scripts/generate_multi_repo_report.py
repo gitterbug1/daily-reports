@@ -203,9 +203,9 @@ def build_run_summary(events: List[Dict], logs_list: List[str], repo: str) -> Di
     platforms = ["instagram", "facebook", "youtube"]
     fallback = analyze_logs_fallback("\n".join(logs_list), repo) if logs_list else {}
     summary = {
-        "ayah_key": "?",
         "platforms": {
             platform: {
+                "ayah_key": "?",
                 "api_check": latest_event(events, "api_check", platform),
                 "post_result": latest_event(events, "post_result", platform),
             }
@@ -213,25 +213,32 @@ def build_run_summary(events: List[Dict], logs_list: List[str], repo: str) -> Di
         },
     }
 
-    for event in reversed(events):
-        ayah_key = event.get("ayah_key")
-        if ayah_key:
-            summary["ayah_key"] = ayah_key
-            break
-
-    if summary["ayah_key"] == "?":
-        for logs in logs_list:
-            ayah_key, _ = extract_post_details_fallback(logs)
-            if ayah_key != "?":
-                summary["ayah_key"] = ayah_key
-                break
-
     if fallback:
         for platform in platforms:
             if not summary["platforms"][platform]["api_check"]:
                 summary["platforms"][platform]["api_check"] = fallback[platform]["api_check"]
             if not summary["platforms"][platform]["post_result"]:
                 summary["platforms"][platform]["post_result"] = fallback[platform]["post_result"]
+
+    for platform in platforms:
+        for event_name in ("post_result", "api_check"):
+            event = summary["platforms"][platform][event_name]
+            ayah_key = event.get("ayah_key") if event else None
+            if ayah_key:
+                summary["platforms"][platform]["ayah_key"] = ayah_key
+                break
+
+    fallback_ayah = "?"
+    for logs in logs_list:
+        ayah_key, _ = extract_post_details_fallback(logs)
+        if ayah_key != "?":
+            fallback_ayah = ayah_key
+            break
+
+    if fallback_ayah != "?":
+        for platform in platforms:
+            if summary["platforms"][platform]["ayah_key"] == "?":
+                summary["platforms"][platform]["ayah_key"] = fallback_ayah
 
     return summary
 
@@ -251,14 +258,26 @@ def format_api_cell(event: Dict) -> str:
 
     status = format_status(event.get("status"))
     token_status = event.get("token_status")
-    expiry = to_ist_label(event.get("token_expires_at")) if event.get("token_expires_at") else None
+    token_expires_at = event.get("token_expires_at")
+    data_access_expires_at = event.get("data_access_expires_at")
+    token_expired = event.get("token_expired")
 
-    if token_status and expiry and expiry != "?":
-        return f"{status} ({token_status}, {expiry})"
+    details = []
     if token_status:
-        return f"{status} ({token_status})"
-    if expiry and expiry != "?":
-        return f"{status} ({expiry})"
+        details.append(f"token={token_status}")
+    if token_expired is not None:
+        details.append(f"expired={'yes' if token_expired else 'no'}")
+    if token_expires_at:
+        expiry = to_ist_label(token_expires_at)
+        details.append(f"exp={expiry if expiry != '?' else token_expires_at}")
+    elif token_status:
+        details.append("exp=unknown")
+    if data_access_expires_at:
+        data_expiry = to_ist_label(data_access_expires_at)
+        details.append(f"data_exp={data_expiry if data_expiry != '?' else data_access_expires_at}")
+
+    if details:
+        return f"{status} ({', '.join(details)})"
     return status
 
 
@@ -287,8 +306,8 @@ def generate_repo_report(repo: str) -> str:
         return f"\n### {display_name}\n\nNo workflow runs.\n"
 
     report = f"\n### {display_name}\n\n"
-    report += "| Run # | Workflow | Status | Date | Ayah | IG API | IG Post | FB API | FB Post | YT API | YT Post | Link |\n"
-    report += "|------:|----------|--------|------|------|--------|---------|--------|---------|--------|---------|------|\n"
+    report += "| Run # | Workflow | Status | Date | IG Ayah | IG API | IG Post | FB Ayah | FB API | FB Post | YT Ayah | YT API | YT Post | Link |\n"
+    report += "|------:|----------|--------|------|---------|--------|---------|---------|--------|---------|---------|--------|---------|------|\n"
 
     for run in runs[:10]:
         run_id = run["id"]
@@ -311,11 +330,14 @@ def generate_repo_report(repo: str) -> str:
         link = f"https://github.com/{repo}/actions/runs/{run_id}"
 
         report += (
-            f"| #{run_number} | {workflow_name} | {status} | {created_at} | {summary['ayah_key']} | "
+            f"| #{run_number} | {workflow_name} | {status} | {created_at} | "
+            f"{summary['platforms']['instagram']['ayah_key']} | "
             f"{format_api_cell(summary['platforms']['instagram']['api_check'])} | "
             f"{format_post_cell(summary['platforms']['instagram']['post_result'])} | "
+            f"{summary['platforms']['facebook']['ayah_key']} | "
             f"{format_api_cell(summary['platforms']['facebook']['api_check'])} | "
             f"{format_post_cell(summary['platforms']['facebook']['post_result'])} | "
+            f"{summary['platforms']['youtube']['ayah_key']} | "
             f"{format_api_cell(summary['platforms']['youtube']['api_check'])} | "
             f"{format_post_cell(summary['platforms']['youtube']['post_result'])} | "
             f"[View]({link}) |\n"
