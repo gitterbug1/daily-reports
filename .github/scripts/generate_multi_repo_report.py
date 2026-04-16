@@ -107,18 +107,63 @@ def to_ist_label(value: str | None) -> str:
 
 
 def parse_upload_events(logs: str) -> List[Dict]:
+    def parse_event_payload(payload: str) -> Dict | None:
+        normalized = payload.strip()
+        if not normalized:
+            return None
+
+        candidate_payloads = [normalized]
+
+        trimmed_stars = normalized.strip("*").strip()
+        if trimmed_stars and trimmed_stars != normalized:
+            candidate_payloads.append(trimmed_stars)
+
+        for candidate in list(candidate_payloads):
+            if candidate and not candidate.startswith("{") and '"' in candidate:
+                candidate_payloads.append("{" + candidate.lstrip("* ").rstrip("* ") + "}")
+
+        for candidate in candidate_payloads:
+            try:
+                parsed = json.loads(candidate)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(parsed, dict):
+                return parsed
+
+        recovered: Dict[str, object] = {}
+        for key, value in re.findall(r'"([^"]+)":\s*"([^"]*)"', normalized):
+            recovered[key] = value
+        for key, value in re.findall(r'"([^"]+)":\s*(null|true|false|-?\d+(?:\.\d+)?)', normalized, flags=re.IGNORECASE):
+            lowered = value.lower()
+            if lowered == "null":
+                recovered[key] = None
+            elif lowered == "true":
+                recovered[key] = True
+            elif lowered == "false":
+                recovered[key] = False
+            elif "." in value:
+                try:
+                    recovered[key] = float(value)
+                except ValueError:
+                    recovered[key] = value
+            else:
+                try:
+                    recovered[key] = int(value)
+                except ValueError:
+                    recovered[key] = value
+
+        return recovered or None
+
     events: List[Dict] = []
     for line in logs.splitlines():
         prefix_index = line.find(EVENT_PREFIX)
         if prefix_index == -1:
             continue
         payload = line[prefix_index + len(EVENT_PREFIX):].strip()
-        try:
-            event = json.loads(payload)
-        except json.JSONDecodeError:
+        event = parse_event_payload(payload)
+        if not event:
             continue
-        if isinstance(event, dict):
-            events.append(event)
+        events.append(event)
     return events
 
 
