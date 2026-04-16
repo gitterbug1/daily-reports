@@ -137,19 +137,54 @@ def extract_post_details_fallback(logs: str):
 
 def analyze_logs_fallback(logs: str, repo: str) -> Dict[str, Dict[str, str]]:
     logs_lower = logs.lower()
-    if repo == "iwilllearnquran/learnqurandaily":
-        instagram = "success" if "successfully uploaded video to instagram" in logs_lower else "failed" if "failed to upload video" in logs_lower else "unknown"
-        facebook = "success" if "facebook page upload successful" in logs_lower else "failed" if "facebook" in logs_lower and "error" in logs_lower else "unknown"
-        youtube = "success" if "upload complete! video id" in logs_lower else "failed" if "invalid_grant" in logs_lower else "unknown"
-    else:
-        instagram = "success" if "successfully uploaded video to instagram" in logs_lower else "failed" if "failed to upload video" in logs_lower else "unknown"
-        facebook = "success" if "facebook page upload successful" in logs_lower else "failed" if "facebook" in logs_lower and "failed" in logs_lower else "unknown"
-        youtube = "success" if "upload complete! video id" in logs_lower else "failed" if "invalid_grant" in logs_lower else "unknown"
+    instagram_api_status = (
+        "success" if "instagram graph api validated" in logs_lower
+        else "failed" if "instagram graph api validation failed" in logs_lower or "missing ig_graph_access_token" in logs_lower or "missing ig_user_id" in logs_lower
+        else "unknown"
+    )
+    instagram_post_status = (
+        "success" if "successfully uploaded video to instagram" in logs_lower
+        else "failed" if "failed to upload video" in logs_lower
+        else "unknown"
+    )
+
+    fb_debug_valid = re.search(r"\[fb debug\] token valid:\s*(true|false).*?expires:\s*([^\r\n]+)", logs, re.IGNORECASE)
+    facebook_api_status = (
+        "success" if fb_debug_valid and fb_debug_valid.group(1).lower() == "true"
+        else "failed" if fb_debug_valid and fb_debug_valid.group(1).lower() == "false"
+        else "skipped" if "facebook page upload skipped" in logs_lower
+        else "success" if "facebook page upload successful" in logs_lower
+        else "failed" if "facebook page upload failed" in logs_lower or "facebook page upload step failed" in logs_lower
+        else "unknown"
+    )
+    facebook_post_status = (
+        "success" if "facebook page upload successful" in logs_lower
+        else "failed" if "facebook page upload failed" in logs_lower or "facebook page upload step failed" in logs_lower
+        else "skipped" if "facebook page upload skipped" in logs_lower
+        else "unknown"
+    )
+
+    youtube_api_status = (
+        "failed" if "invalid_grant" in logs_lower or "client secret not found" in logs_lower or "no yt_client_secret_json" in logs_lower
+        else "success" if "uploading" in logs_lower and "to youtube" in logs_lower
+        else "unknown"
+    )
+    youtube_post_status = (
+        "success" if "upload complete! video id" in logs_lower
+        else "failed" if "invalid_grant" in logs_lower
+        else "unknown"
+    )
+
+    facebook_api_event = {"status": facebook_api_status}
+    if fb_debug_valid:
+        expires_raw = fb_debug_valid.group(2).strip()
+        if expires_raw and expires_raw.upper() != "NEVER":
+            facebook_api_event["token_expires_at"] = expires_raw
 
     return {
-        "instagram": {"api_check": {"status": "unknown"}, "post_result": {"status": instagram}},
-        "facebook": {"api_check": {"status": "unknown"}, "post_result": {"status": facebook}},
-        "youtube": {"api_check": {"status": "unknown"}, "post_result": {"status": youtube}},
+        "instagram": {"api_check": {"status": instagram_api_status}, "post_result": {"status": instagram_post_status}},
+        "facebook": {"api_check": facebook_api_event, "post_result": {"status": facebook_post_status}},
+        "youtube": {"api_check": {"status": youtube_api_status}, "post_result": {"status": youtube_post_status}},
     }
 
 
@@ -166,6 +201,7 @@ def latest_event(events: List[Dict], event_name: str, platform: str) -> Dict:
 
 def build_run_summary(events: List[Dict], logs_list: List[str], repo: str) -> Dict:
     platforms = ["instagram", "facebook", "youtube"]
+    fallback = analyze_logs_fallback("\n".join(logs_list), repo) if logs_list else {}
     summary = {
         "ayah_key": "?",
         "platforms": {
@@ -190,10 +226,12 @@ def build_run_summary(events: List[Dict], logs_list: List[str], repo: str) -> Di
                 summary["ayah_key"] = ayah_key
                 break
 
-    if not events and logs_list:
-        fallback = analyze_logs_fallback("\n".join(logs_list), repo)
+    if fallback:
         for platform in platforms:
-            summary["platforms"][platform] = fallback[platform]
+            if not summary["platforms"][platform]["api_check"]:
+                summary["platforms"][platform]["api_check"] = fallback[platform]["api_check"]
+            if not summary["platforms"][platform]["post_result"]:
+                summary["platforms"][platform]["post_result"] = fallback[platform]["post_result"]
 
     return summary
 
