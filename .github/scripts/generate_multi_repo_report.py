@@ -351,7 +351,7 @@ def generate_repo_report(repo: str) -> str:
         return f"\n### {display_name}\n\nNo workflow runs.\n"
 
     report = f"\n## {display_name}\n\n"
-    report += "| Run # | Workflow | IG Ayah | IG Post | IG Date | YT Ayah | YT Post | YT Date | FB Ayah | FB Post | FB Date | Link |\n"
+    report += '| Run # | Workflow | <span style="color:#C13584">**IG Ayah**</span> | <span style="color:#C13584">**IG Post**</span> | <span style="color:#C13584">**IG Date**</span> | <span style="color:#FF0000">**YT Ayah**</span> | <span style="color:#FF0000">**YT Post**</span> | <span style="color:#FF0000">**YT Date**</span> | <span style="color:#1877F2">**FB Ayah**</span> | <span style="color:#1877F2">**FB Post**</span> | <span style="color:#1877F2">**FB Date**</span> | Link |\n'
     report += "|------:|----------|---------|---------|---------|---------|---------|---------|---------|---------|---------|------|\n"
 
     api_summary = {"instagram": {}, "facebook": {}, "youtube": {}}
@@ -383,6 +383,11 @@ def generate_repo_report(repo: str) -> str:
         yt_post_status = format_status(yt_post_event.get("status")) if yt_post_event else "UNKNOWN"
         fb_post_status = format_status(fb_post_event.get("status")) if fb_post_event else "UNKNOWN"
 
+        # Color code the status
+        ig_post_colored = f'<span class="{ig_post_status.lower()}">{ig_post_status}</span>'
+        yt_post_colored = f'<span class="{yt_post_status.lower()}">{yt_post_status}</span>'
+        fb_post_colored = f'<span class="{fb_post_status.lower()}">{fb_post_status}</span>'
+
         ig_date = to_ist_label(ig_post_event.get("posted_at") or ig_post_event.get("logged_at")) if ig_post_event else "?"
         yt_date = to_ist_label(yt_post_event.get("posted_at") or yt_post_event.get("logged_at")) if yt_post_event else "?"
         fb_date = to_ist_label(fb_post_event.get("posted_at") or fb_post_event.get("logged_at")) if fb_post_event else "?"
@@ -396,11 +401,11 @@ def generate_repo_report(repo: str) -> str:
         report += (
             f"| #{run_number} | {workflow_name} | "
             f"{summary['platforms']['instagram']['ayah_key']} | "
-            f"{ig_post_status} | {ig_date} | "
+            f"{ig_post_colored} | {ig_date} | "
             f"{summary['platforms']['youtube']['ayah_key']} | "
-            f"{yt_post_status} | {yt_date} | "
+            f"{yt_post_colored} | {yt_date} | "
             f"{summary['platforms']['facebook']['ayah_key']} | "
-            f"{fb_post_status} | {fb_date} | "
+            f"{fb_post_colored} | {fb_date} | "
             f"[View]({link}) |\n"
         )
 
@@ -454,7 +459,7 @@ def markdown_to_html(md: str):
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
                 color: #e2e8f0;
-                padding: 40px 20px;
+                padding: 20px;
                 min-height: 100vh;
             }}
             .container {{
@@ -463,17 +468,17 @@ def markdown_to_html(md: str):
             }}
             h2 {{
                 color: #60a5fa;
-                margin: 40px 0 20px 0;
+                margin: 30px 0 15px 0;
                 padding: 15px;
                 background: rgba(30, 41, 59, 0.8);
                 border-left: 4px solid #3b82f6;
                 border-radius: 4px;
-                font-size: 1.8em;
+                font-size: clamp(1.3em, 5vw, 1.8em);
             }}
             h3 {{
                 color: #93c5fd;
-                margin: 30px 0 15px 0;
-                font-size: 1.2em;
+                margin: 20px 0 10px 0;
+                font-size: clamp(1em, 4vw, 1.2em);
                 padding: 10px 15px;
                 background: rgba(30, 41, 59, 0.6);
                 border-radius: 4px;
@@ -481,8 +486,8 @@ def markdown_to_html(md: str):
             table {{
                 border-collapse: collapse;
                 width: 100%;
-                margin: 20px 0;
-                font-size: 0.9em;
+                margin: 15px 0;
+                font-size: clamp(0.75em, 2vw, 0.9em);
                 background: rgba(30, 41, 59, 0.9);
                 border-radius: 8px;
                 overflow: hidden;
@@ -491,13 +496,14 @@ def markdown_to_html(md: str):
             th {{
                 background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
                 color: #e0e7ff;
-                padding: 14px;
+                padding: clamp(8px, 2vw, 14px);
                 text-align: left;
                 font-weight: 600;
                 border-bottom: 2px solid #3b82f6;
+                white-space: nowrap;
             }}
             td {{
-                padding: 12px 14px;
+                padding: clamp(8px, 2vw, 12px);
                 border-bottom: 1px solid #334155;
             }}
             tr:hover {{
@@ -521,47 +527,102 @@ def markdown_to_html(md: str):
             }}
             .success {{
                 color: #86efac;
-                font-weight: 600;
+                font-weight: 700;
+                background: rgba(134, 239, 172, 0.15);
+                padding: 4px 8px;
+                border-radius: 3px;
+                display: inline-block;
             }}
             .failed {{
                 color: #f87171;
-                font-weight: 600;
+                font-weight: 700;
+                background: rgba(248, 113, 113, 0.15);
+                padding: 4px 8px;
+                border-radius: 3px;
+                display: inline-block;
             }}
             .unknown {{
                 color: #fbbf24;
-                font-weight: 600;
+                font-weight: 700;
+                background: rgba(251, 191, 36, 0.15);
+                padding: 4px 8px;
+                border-radius: 3px;
+                display: inline-block;
+            }}
+            .skipped {{
+                color: #94a3b8;
+                font-weight: 700;
+                background: rgba(148, 163, 184, 0.15);
+                padding: 4px 8px;
+                border-radius: 3px;
+                display: inline-block;
             }}
             .api-section {{
                 background: rgba(30, 41, 59, 0.8);
-                padding: 20px;
-                margin: 20px 0;
+                padding: 15px;
+                margin: 15px 0;
                 border-radius: 8px;
                 border-left: 4px solid #8b5cf6;
             }}
             .api-section strong {{
                 color: #a78bfa;
             }}
-            .status-good {{
-                color: #86efac;
-            }}
-            .status-bad {{
-                color: #f87171;
-            }}
-            .status-warn {{
-                color: #fbbf24;
-            }}
             .header {{
                 text-align: center;
-                margin-bottom: 40px;
+                margin-bottom: 30px;
             }}
             .header h1 {{
                 color: #60a5fa;
                 margin-bottom: 10px;
-                font-size: 2.5em;
+                font-size: clamp(1.8em, 8vw, 2.5em);
             }}
             .header p {{
                 color: #94a3b8;
-                font-size: 1.1em;
+                font-size: clamp(0.9em, 3vw, 1.1em);
+            }}
+            /* Mobile responsive */
+            @media (max-width: 768px) {{
+                body {{
+                    padding: 10px;
+                }}
+                .container {{
+                    padding: 0;
+                }}
+                table {{
+                    font-size: 0.8em;
+                }}
+                th, td {{
+                    padding: 6px 8px;
+                }}
+                th {{
+                    white-space: normal;
+                }}
+                h2 {{
+                    margin: 20px 0 10px 0;
+                    padding: 10px;
+                }}
+                .api-section {{
+                    padding: 10px;
+                    margin: 10px 0;
+                }}
+            }}
+            @media (max-width: 480px) {{
+                table {{
+                    font-size: 0.7em;
+                }}
+                th, td {{
+                    padding: 4px 6px;
+                }}
+                .header h1 {{
+                    font-size: 1.5em;
+                }}
+                .header p {{
+                    font-size: 0.85em;
+                }}
+                .success, .failed, .unknown, .skipped {{
+                    padding: 2px 4px;
+                    font-size: 0.9em;
+                }}
             }}
         </style>
     </head>
