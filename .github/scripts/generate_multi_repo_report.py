@@ -351,7 +351,7 @@ def generate_repo_report(repo: str) -> str:
         return f"\n### {display_name}\n\nNo workflow runs.\n"
 
     report = f"\n## {display_name}\n\n"
-    report += '| Run # | Workflow | <span style="color:#C13584">**IG Ayah**</span> | <span style="color:#C13584">**IG Post**</span> | <span style="color:#C13584">**IG Date**</span> | <span style="color:#FF0000">**YT Ayah**</span> | <span style="color:#FF0000">**YT Post**</span> | <span style="color:#FF0000">**YT Date**</span> | <span style="color:#1877F2">**FB Ayah**</span> | <span style="color:#1877F2">**FB Post**</span> | <span style="color:#1877F2">**FB Date**</span> | Link |\n'
+    report += '| Run # | Workflow | <span style="color:#DA88B3">**IG Ayah**</span> | <span style="color:#DA88B3">**IG Post**</span> | <span style="color:#DA88B3">**IG Date**</span> | <span style="color:#FF7F7F">**YT Ayah**</span> | <span style="color:#FF7F7F">**YT Post**</span> | <span style="color:#FF7F7F">**YT Date**</span> | <span style="color:#6BA3E5">**FB Ayah**</span> | <span style="color:#6BA3E5">**FB Post**</span> | <span style="color:#6BA3E5">**FB Date**</span> | Link |\n'
     report += "|------:|----------|---------|---------|---------|---------|---------|---------|---------|---------|---------|------|\n"
 
     api_summary = {"instagram": {}, "facebook": {}, "youtube": {}}
@@ -440,229 +440,249 @@ def generate_full_report():
     return report
 
 
-# (everything above remains EXACTLY the same)
-
-# (everything above remains EXACTLY the same)
-
 def markdown_to_html(md: str):
     import markdown
 
     body = markdown.markdown(md, extensions=["tables"])
-
     return f"""
     <html>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-        <!-- Google Font -->
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
         <style>
-            :root {{
-                --bg: #0f172a;
-                --card: #111827;
-                --muted: #94a3b8;
-                --text: #e5e7eb;
-                --border: #1f2937;
-
-                --ig: #d946ef;
-                --yt: #ef4444;
-                --fb: #3b82f6;
-
-                --success: #22c55e;
-                --failed: #ef4444;
-                --unknown: #f59e0b;
-                --skipped: #64748b;
-            }}
-
             * {{
                 margin: 0;
                 padding: 0;
                 box-sizing: border-box;
             }}
-
             body {{
-                font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-                background: linear-gradient(180deg, #0b1220, #0f172a);
-                color: var(--text);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                color: #e2e8f0;
                 padding: 20px;
+                min-height: 100vh;
             }}
-
             .container {{
-                max-width: 1200px;
-                margin: auto;
+                max-width: 1400px;
+                margin: 0 auto;
             }}
-
+            h2 {{
+                color: #60a5fa;
+                margin: 30px 0 15px 0;
+                padding: 15px;
+                background: rgba(30, 41, 59, 0.8);
+                border-left: 4px solid #3b82f6;
+                border-radius: 4px;
+                font-size: clamp(1.3em, 5vw, 1.8em);
+            }}
+            h3 {{
+                color: #93c5fd;
+                margin: 20px 0 10px 0;
+                font-size: clamp(1em, 4vw, 1.2em);
+                padding: 10px 15px;
+                background: rgba(30, 41, 59, 0.6);
+                border-radius: 4px;
+            }}
+            table {{
+                border-collapse: collapse;
+                width: 100%;
+                margin: 15px 0;
+                font-size: clamp(0.75em, 2vw, 0.9em);
+                background: rgba(30, 41, 59, 0.9);
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }}
+            th {{
+                color: #e0e7ff;
+                padding: clamp(8px, 2vw, 14px);
+                text-align: left;
+                font-weight: 600;
+                border-bottom: 2px solid #3b82f6;
+                white-space: nowrap;
+            }}
+            /* Instagram header (cols 3-5) */
+            th:nth-child(3), th:nth-child(4), th:nth-child(5) {{
+                background: linear-gradient(135deg, #DA88B3 0%, #C8739E 100%);
+                border-right: 1px solid rgba(218, 136, 179, 0.3);
+            }}
+            /* YouTube header (cols 6-8) */
+            th:nth-child(6), th:nth-child(7), th:nth-child(8) {{
+                background: linear-gradient(135deg, #FF7F7F 0%, #E85555 100%);
+                border-right: 1px solid rgba(255, 127, 127, 0.3);
+            }}
+            /* Facebook header (cols 9-11) */
+            th:nth-child(9), th:nth-child(10), th:nth-child(11) {{
+                background: linear-gradient(135deg, #6BA3E5 0%, #5A8FD1 100%);
+                border-right: 1px solid rgba(107, 163, 229, 0.3);
+            }}
+            /* Run # and Workflow headers */
+            th:nth-child(1), th:nth-child(2) {{
+                background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+                border-right: 2px solid rgba(255,255,255,0.2);
+            }}
+            /* Link header */
+            th:nth-child(12) {{
+                background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+                border-left: 2px solid rgba(255,255,255,0.2);
+            }}
+            td {{
+                padding: clamp(8px, 2vw, 12px);
+                border-bottom: 1px solid #334155;
+            }}
+            /* Instagram cells (cols 3-5) */
+            td:nth-child(3), td:nth-child(4), td:nth-child(5) {{
+                background: rgba(218, 136, 179, 0.06);
+                border-right: 1px solid rgba(218, 136, 179, 0.15);
+            }}
+            /* YouTube cells (cols 6-8) */
+            td:nth-child(6), td:nth-child(7), td:nth-child(8) {{
+                background: rgba(255, 127, 127, 0.06);
+                border-right: 1px solid rgba(255, 127, 127, 0.15);
+            }}
+            /* Facebook cells (cols 9-11) */
+            td:nth-child(9), td:nth-child(10), td:nth-child(11) {{
+                background: rgba(107, 163, 229, 0.06);
+                border-right: 1px solid rgba(107, 163, 229, 0.15);
+            }}
+            tr:hover td:nth-child(3), tr:hover td:nth-child(4), tr:hover td:nth-child(5) {{
+                background: rgba(218, 136, 179, 0.12);
+            }}
+            tr:hover td:nth-child(6), tr:hover td:nth-child(7), tr:hover td:nth-child(8) {{
+                background: rgba(255, 127, 127, 0.12);
+            }}
+            tr:hover td:nth-child(9), tr:hover td:nth-child(10), tr:hover td:nth-child(11) {{
+                background: rgba(107, 163, 229, 0.12);
+            }}
+            tr:last-child td {{
+                border-bottom: none;
+            }}
+            a {{
+                color: #60a5fa;
+                text-decoration: none;
+                font-weight: 500;
+                padding: 4px 8px;
+                border-radius: 3px;
+                background: rgba(96, 165, 250, 0.1);
+                transition: all 0.2s ease;
+            }}
+            a:hover {{
+                color: #93c5fd;
+                background: rgba(96, 165, 250, 0.2);
+            }}
+            .success {{
+                color: #86efac;
+                font-weight: 700;
+                background: rgba(134, 239, 172, 0.15);
+                padding: 4px 8px;
+                border-radius: 3px;
+                display: inline-block;
+            }}
+            .failed {{
+                color: #f87171;
+                font-weight: 700;
+                background: rgba(248, 113, 113, 0.15);
+                padding: 4px 8px;
+                border-radius: 3px;
+                display: inline-block;
+            }}
+            .unknown {{
+                color: #fbbf24;
+                font-weight: 700;
+                background: rgba(251, 191, 36, 0.15);
+                padding: 4px 8px;
+                border-radius: 3px;
+                display: inline-block;
+            }}
+            .skipped {{
+                color: #94a3b8;
+                font-weight: 700;
+                background: rgba(148, 163, 184, 0.15);
+                padding: 4px 8px;
+                border-radius: 3px;
+                display: inline-block;
+            }}
+            .api-section {{
+                background: rgba(30, 41, 59, 0.8);
+                padding: 15px;
+                margin: 15px 0;
+                border-radius: 8px;
+                border-left: 4px solid #8b5cf6;
+            }}
+            .api-section strong {{
+                color: #a78bfa;
+            }}
             .header {{
                 text-align: center;
                 margin-bottom: 30px;
             }}
-
             .header h1 {{
-                font-size: 2rem;
-                font-weight: 600;
-                color: #e2e8f0;
-            }}
-
-            .header p {{
-                color: var(--muted);
-                margin-top: 5px;
-            }}
-
-            h2 {{
-                margin-top: 30px;
+                color: #60a5fa;
                 margin-bottom: 10px;
-                font-size: 1.4rem;
-                font-weight: 600;
-                color: #cbd5f5;
+                font-size: clamp(1.8em, 8vw, 2.5em);
             }}
-
-            h3 {{
-                margin-top: 15px;
-                color: #a5b4fc;
-                font-size: 1rem;
+            .header p {{
+                color: #94a3b8;
+                font-size: clamp(0.9em, 3vw, 1.1em);
             }}
-
-            .table-wrapper {{
-                overflow-x: auto;
-                border-radius: 10px;
-            }}
-
-            table {{
-                width: 100%;
-                border-collapse: collapse;
-                background: var(--card);
-                border: 1px solid var(--border);
-                border-radius: 10px;
-                overflow: hidden;
-                font-size: 0.9rem;
-            }}
-
-            th {{
-                text-align: left;
-                padding: 12px;
-                font-weight: 500;
-                color: #cbd5f5;
-                background: #0f172a;
-                border-bottom: 1px solid var(--border);
-                white-space: nowrap;
-            }}
-
-            /* Platform accent lines */
-            th:nth-child(3), th:nth-child(4), th:nth-child(5) {{
-                box-shadow: inset 0 3px 0 var(--ig);
-            }}
-
-            th:nth-child(6), th:nth-child(7), th:nth-child(8) {{
-                box-shadow: inset 0 3px 0 var(--yt);
-            }}
-
-            th:nth-child(9), th:nth-child(10), th:nth-child(11) {{
-                box-shadow: inset 0 3px 0 var(--fb);
-            }}
-
-            td {{
-                padding: 12px;
-                border-bottom: 1px solid var(--border);
-            }}
-
-            tr:hover {{
-                background: rgba(255, 255, 255, 0.03);
-            }}
-
-            a {{
-                color: #93c5fd;
-                text-decoration: none;
-            }}
-
-            a:hover {{
-                text-decoration: underline;
-            }}
-
-            /* Status pills */
-            .success,
-            .failed,
-            .unknown,
-            .skipped {{
-                padding: 4px 8px;
-                border-radius: 999px;
-                font-size: 0.75rem;
-                font-weight: 600;
-                display: inline-block;
-            }}
-
-            .success {{
-                background: rgba(34, 197, 94, 0.15);
-                color: var(--success);
-            }}
-
-            .failed {{
-                background: rgba(239, 68, 68, 0.15);
-                color: var(--failed);
-            }}
-
-            .unknown {{
-                background: rgba(245, 158, 11, 0.15);
-                color: var(--unknown);
-            }}
-
-            .skipped {{
-                background: rgba(100, 116, 139, 0.15);
-                color: var(--skipped);
-            }}
-
-            .api-section {{
-                background: var(--card);
-                border: 1px solid var(--border);
-                border-radius: 10px;
-                padding: 12px;
-                margin-top: 15px;
-                font-size: 0.9rem;
-            }}
-
+            /* Mobile responsive */
             @media (max-width: 768px) {{
                 body {{
                     padding: 10px;
                 }}
-
+                .container {{
+                    padding: 0;
+                }}
                 table {{
-                    font-size: 0.8rem;
+                    font-size: 0.8em;
                 }}
-
                 th, td {{
-                    padding: 8px;
+                    padding: 6px 8px;
                 }}
-
+                th {{
+                    white-space: normal;
+                }}
+                h2 {{
+                    margin: 20px 0 10px 0;
+                    padding: 10px;
+                }}
+                .api-section {{
+                    padding: 10px;
+                    margin: 10px 0;
+                }}
+            }}
+            @media (max-width: 480px) {{
+                table {{
+                    font-size: 0.7em;
+                }}
+                th, td {{
+                    padding: 4px 6px;
+                }}
                 .header h1 {{
-                    font-size: 1.5rem;
+                    font-size: 1.5em;
+                }}
+                .header p {{
+                    font-size: 0.85em;
+                }}
+                .success, .failed, .unknown, .skipped {{
+                    padding: 2px 4px;
+                    font-size: 0.9em;
                 }}
             }}
         </style>
     </head>
-
     <body>
         <div class="container">
             <div class="header">
                 <h1>Daily Upload Report</h1>
                 <p>Quran Upload Automation Status</p>
             </div>
-
             {body}
         </div>
-
-        <script>
-            // Wrap all tables for mobile scroll
-            document.querySelectorAll("table").forEach(table => {{
-                const wrapper = document.createElement("div");
-                wrapper.className = "table-wrapper";
-                table.parentNode.insertBefore(wrapper, table);
-                wrapper.appendChild(table);
-            }});
-        </script>
     </body>
     </html>
     """
+
 
 def save_report(report: str):
     os.makedirs("site", exist_ok=True)
