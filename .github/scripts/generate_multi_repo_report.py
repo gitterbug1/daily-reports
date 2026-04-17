@@ -490,8 +490,8 @@ def markdown_to_html(md: str):
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 margin: 15px 0;
                 width: 100%;
-            }
-            table {
+            }}
+            table {{
                 border-collapse: collapse;
                 width: 100%;
                 min-width: 100%;
