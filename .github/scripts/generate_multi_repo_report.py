@@ -444,7 +444,7 @@ def markdown_to_html(md: str):
     import markdown
 
     body = markdown.markdown(md, extensions=["tables"])
-    return f"""
+    return """
     <html>
     <head>
         <meta charset="UTF-8">
@@ -730,7 +730,7 @@ def markdown_to_html(md: str):
         </div>
     </body>
     </html>
-    """
+    """.format(body=body)
 
 
 def save_report(report: str):
