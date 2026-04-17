@@ -351,7 +351,7 @@ def generate_repo_report(repo: str) -> str:
         return f"\n### {display_name}\n\nNo workflow runs.\n"
 
     report = f"\n## {display_name}\n\n"
-    report += '| Run # | Workflow | <span style="color:#DA88B3">**IG Ayah**</span> | <span style="color:#DA88B3">**IG Post**</span> | <span style="color:#DA88B3">**IG Date**</span> | <span style="color:#FF7F7F">**YT Ayah**</span> | <span style="color:#FF7F7F">**YT Post**</span> | <span style="color:#FF7F7F">**YT Date**</span> | <span style="color:#6BA3E5">**FB Ayah**</span> | <span style="color:#6BA3E5">**FB Post**</span> | <span style="color:#6BA3E5">**FB Date**</span> | Link |\n'
+    report += '| Run # | Workflow | IG Ayah | IG Post | IG Date | YT Ayah | YT Post | YT Date | FB Ayah | FB Post | FB Date | Link |\n'
     report += "|------:|----------|---------|---------|---------|---------|---------|---------|---------|---------|---------|------|\n"
 
     api_summary = {"instagram": {}, "facebook": {}, "youtube": {}}
@@ -483,23 +483,28 @@ def markdown_to_html(md: str):
                 background: rgba(30, 41, 59, 0.6);
                 border-radius: 4px;
             }}
+            .table-wrapper {{
+                overflow-x: auto;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                margin: 15px 0;
+            }}
             table {{
                 border-collapse: collapse;
                 width: 100%;
-                margin: 15px 0;
                 font-size: clamp(0.75em, 2vw, 0.9em);
                 background: rgba(30, 41, 59, 0.9);
                 border-radius: 8px;
                 overflow: hidden;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             }}
             th {{
-                color: #e0e7ff;
+                color: #ffffff;
                 padding: clamp(8px, 2vw, 14px);
                 text-align: left;
-                font-weight: 600;
+                font-weight: 700;
                 border-bottom: 2px solid #3b82f6;
                 white-space: nowrap;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
             }}
             /* Instagram header (cols 3-5) */
             th:nth-child(3), th:nth-child(4), th:nth-child(5) {{
@@ -626,6 +631,12 @@ def markdown_to_html(md: str):
                 font-size: clamp(0.9em, 3vw, 1.1em);
             }}
             /* Mobile responsive */
+            @media (max-width: 1024px) {{
+                .table-wrapper {{
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                }}
+            }}
             @media (max-width: 768px) {{
                 body {{
                     padding: 10px;
@@ -634,39 +645,50 @@ def markdown_to_html(md: str):
                     padding: 0;
                 }}
                 table {{
-                    font-size: 0.8em;
+                    font-size: 0.75em;
+                    min-width: 600px;
                 }}
                 th, td {{
                     padding: 6px 8px;
                 }}
                 th {{
-                    white-space: normal;
+                    white-space: nowrap;
                 }}
                 h2 {{
                     margin: 20px 0 10px 0;
                     padding: 10px;
+                    font-size: 1.2em;
                 }}
                 .api-section {{
                     padding: 10px;
                     margin: 10px 0;
+                    font-size: 0.85em;
                 }}
             }}
             @media (max-width: 480px) {{
+                body {{
+                    padding: 8px;
+                }}
                 table {{
-                    font-size: 0.7em;
+                    font-size: 0.65em;
+                    min-width: 500px;
                 }}
                 th, td {{
                     padding: 4px 6px;
                 }}
                 .header h1 {{
-                    font-size: 1.5em;
+                    font-size: 1.3em;
                 }}
                 .header p {{
-                    font-size: 0.85em;
+                    font-size: 0.8em;
                 }}
                 .success, .failed, .unknown, .skipped {{
                     padding: 2px 4px;
-                    font-size: 0.9em;
+                    font-size: 0.75em;
+                }}
+                h2 {{
+                    font-size: 1.1em;
+                    padding: 8px;
                 }}
             }}
         </style>
@@ -687,6 +709,9 @@ def markdown_to_html(md: str):
 def save_report(report: str):
     os.makedirs("site", exist_ok=True)
     html = markdown_to_html(report)
+    # Wrap tables in scrollable container
+    html = html.replace('<table>', '<div class="table-wrapper"><table>', 1)
+    html = html.replace('</table>', '</table></div>', 1)
     with open("site/index.html", "w", encoding="utf-8") as file_obj:
         file_obj.write(html)
     print("HTML report generated")
