@@ -39,17 +39,20 @@
             }
             .table-wrapper {
                 overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
                 border-radius: 8px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 margin: 15px 0;
+                width: 100%;
             }
             table {
                 border-collapse: collapse;
                 width: 100%;
+                min-width: 100%;
                 font-size: clamp(0.75em, 2vw, 0.9em);
                 background: rgba(30, 41, 59, 0.9);
                 border-radius: 8px;
-                overflow: hidden;
+                overflow: visible;
             }
             th {
                 color: #ffffff;
@@ -185,7 +188,7 @@
                 font-size: clamp(0.9em, 3vw, 1.1em);
             }
             /* Mobile responsive */
-            @media (max-width: 1024px) {
+            @media (max-width: 1200px) {
                 .table-wrapper {
                     overflow-x: auto;
                     -webkit-overflow-scrolling: touch;
@@ -193,56 +196,80 @@
             }
             @media (max-width: 768px) {
                 body {
-                    padding: 10px;
+                    padding: 12px;
                 }
                 .container {
                     padding: 0;
+                    max-width: 100%;
                 }
                 table {
-                    font-size: 0.75em;
-                    min-width: 600px;
+                    font-size: 0.7em;
+                    min-width: 100%;
                 }
                 th, td {
-                    padding: 6px 8px;
+                    padding: 6px 4px;
                 }
                 th {
                     white-space: nowrap;
+                    font-size: 0.85em;
                 }
                 h2 {
-                    margin: 20px 0 10px 0;
+                    margin: 15px 0 10px 0;
                     padding: 10px;
-                    font-size: 1.2em;
+                    font-size: 1.1em;
+                }
+                h3 {
+                    font-size: 0.95em;
+                    margin: 10px 0 8px 0;
                 }
                 .api-section {
                     padding: 10px;
                     margin: 10px 0;
-                    font-size: 0.85em;
+                    font-size: 0.8em;
+                }
+                .header h1 {
+                    font-size: 1.6em;
+                }
+                .header p {
+                    font-size: 0.9em;
                 }
             }
             @media (max-width: 480px) {
                 body {
                     padding: 8px;
                 }
+                .container {
+                    max-width: 100%;
+                }
                 table {
-                    font-size: 0.65em;
-                    min-width: 500px;
+                    font-size: 0.6em;
                 }
                 th, td {
-                    padding: 4px 6px;
+                    padding: 4px 3px;
                 }
                 .header h1 {
                     font-size: 1.3em;
+                    margin-bottom: 5px;
                 }
                 .header p {
-                    font-size: 0.8em;
-                }
-                .success, .failed, .unknown, .skipped {
-                    padding: 2px 4px;
                     font-size: 0.75em;
                 }
+                .success, .failed, .unknown, .skipped {
+                    padding: 2px 3px;
+                    font-size: 0.65em;
+                }
                 h2 {
-                    font-size: 1.1em;
+                    font-size: 1em;
                     padding: 8px;
+                    margin: 10px 0 8px 0;
+                }
+                h3 {
+                    font-size: 0.85em;
+                    margin: 8px 0 5px 0;
+                }
+                a {
+                    padding: 2px 4px;
+                    font-size: 0.85em;
                 }
             }
         </style>
@@ -253,7 +280,7 @@
                 <h1>Daily Upload Report</h1>
                 <p>Quran Upload Automation Status</p>
             </div>
-            <p>Generated: 2026-04-17 11:43 UTC</p>
+            <p>Generated: 2026-04-17 11:59 UTC</p>
 <h2>Learn Quran Daily (Arabic)</h2>
 <div class="table-wrapper"><table>
 <thead>
@@ -423,7 +450,7 @@
 <strong>YOUTUBE:</strong>
 - Status: <strong>SUCCESS</strong> | Token: <strong>unknown</strong></p>
 <h2>Learn Urdu Quran Daily</h2>
-<table>
+<div class="table-wrapper"><table>
 <thead>
 <tr>
 <th style="text-align: right;">Run #</th>
@@ -554,7 +581,7 @@
 <td><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24466204414">View</a></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>API Status</h3>
 <p><strong>INSTAGRAM:</strong>
 - Status: <strong>UNKNOWN</strong> | Token: <strong>unknown</strong>
@@ -563,7 +590,7 @@
 <strong>YOUTUBE:</strong>
 - Status: <strong>UNKNOWN</strong> | Token: <strong>unknown</strong></p>
 <h2>Learn English Quran Daily</h2>
-<table>
+<div class="table-wrapper"><table>
 <thead>
 <tr>
 <th style="text-align: right;">Run #</th>
@@ -694,7 +721,7 @@
 <td><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24466311681">View</a></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>API Status</h3>
 <p><strong>INSTAGRAM:</strong>
 - Status: <strong>SUCCESS</strong> | Token: <strong>unknown</strong>
