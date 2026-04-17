@@ -442,6 +442,8 @@ def generate_full_report():
 
 # (everything above remains EXACTLY the same)
 
+# (everything above remains EXACTLY the same)
+
 def markdown_to_html(md: str):
     import markdown
 
@@ -662,7 +664,6 @@ def markdown_to_html(md: str):
     </html>
     """
 
-    
 def save_report(report: str):
     os.makedirs("site", exist_ok=True)
     html = markdown_to_html(report)
