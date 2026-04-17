@@ -485,17 +485,20 @@ def markdown_to_html(md: str):
             }}
             .table-wrapper {{
                 overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
                 border-radius: 8px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 margin: 15px 0;
-            }}
-            table {{
+                width: 100%;
+            }
+            table {
                 border-collapse: collapse;
                 width: 100%;
+                min-width: 100%;
                 font-size: clamp(0.75em, 2vw, 0.9em);
                 background: rgba(30, 41, 59, 0.9);
                 border-radius: 8px;
-                overflow: hidden;
+                overflow: visible;
             }}
             th {{
                 color: #ffffff;
@@ -631,7 +634,7 @@ def markdown_to_html(md: str):
                 font-size: clamp(0.9em, 3vw, 1.1em);
             }}
             /* Mobile responsive */
-            @media (max-width: 1024px) {{
+            @media (max-width: 1200px) {{
                 .table-wrapper {{
                     overflow-x: auto;
                     -webkit-overflow-scrolling: touch;
@@ -639,56 +642,80 @@ def markdown_to_html(md: str):
             }}
             @media (max-width: 768px) {{
                 body {{
-                    padding: 10px;
+                    padding: 12px;
                 }}
                 .container {{
                     padding: 0;
+                    max-width: 100%;
                 }}
                 table {{
-                    font-size: 0.75em;
-                    min-width: 600px;
+                    font-size: 0.7em;
+                    min-width: 100%;
                 }}
                 th, td {{
-                    padding: 6px 8px;
+                    padding: 6px 4px;
                 }}
                 th {{
                     white-space: nowrap;
+                    font-size: 0.85em;
                 }}
                 h2 {{
-                    margin: 20px 0 10px 0;
+                    margin: 15px 0 10px 0;
                     padding: 10px;
-                    font-size: 1.2em;
+                    font-size: 1.1em;
+                }}
+                h3 {{
+                    font-size: 0.95em;
+                    margin: 10px 0 8px 0;
                 }}
                 .api-section {{
                     padding: 10px;
                     margin: 10px 0;
-                    font-size: 0.85em;
+                    font-size: 0.8em;
+                }}
+                .header h1 {{
+                    font-size: 1.6em;
+                }}
+                .header p {{
+                    font-size: 0.9em;
                 }}
             }}
             @media (max-width: 480px) {{
                 body {{
                     padding: 8px;
                 }}
+                .container {{
+                    max-width: 100%;
+                }}
                 table {{
-                    font-size: 0.65em;
-                    min-width: 500px;
+                    font-size: 0.6em;
                 }}
                 th, td {{
-                    padding: 4px 6px;
+                    padding: 4px 3px;
                 }}
                 .header h1 {{
                     font-size: 1.3em;
+                    margin-bottom: 5px;
                 }}
                 .header p {{
-                    font-size: 0.8em;
-                }}
-                .success, .failed, .unknown, .skipped {{
-                    padding: 2px 4px;
                     font-size: 0.75em;
                 }}
+                .success, .failed, .unknown, .skipped {{
+                    padding: 2px 3px;
+                    font-size: 0.65em;
+                }}
                 h2 {{
-                    font-size: 1.1em;
+                    font-size: 1em;
                     padding: 8px;
+                    margin: 10px 0 8px 0;
+                }}
+                h3 {{
+                    font-size: 0.85em;
+                    margin: 8px 0 5px 0;
+                }}
+                a {{
+                    padding: 2px 4px;
+                    font-size: 0.85em;
                 }}
             }}
         </style>
@@ -709,9 +736,9 @@ def markdown_to_html(md: str):
 def save_report(report: str):
     os.makedirs("site", exist_ok=True)
     html = markdown_to_html(report)
-    # Wrap tables in scrollable container
-    html = html.replace('<table>', '<div class="table-wrapper"><table>', 1)
-    html = html.replace('</table>', '</table></div>', 1)
+    # Wrap ALL tables in scrollable container
+    html = html.replace('<table>', '<div class="table-wrapper"><table>')
+    html = html.replace('</table>', '</table></div>')
     with open("site/index.html", "w", encoding="utf-8") as file_obj:
         file_obj.write(html)
     print("HTML report generated")
