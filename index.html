@@ -1,237 +1,319 @@
 
     <html>
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
             body {
-                font-family: Arial;
-                background: #0f172a;
-                color: white;
-                padding: 20px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                color: #e2e8f0;
+                padding: 40px 20px;
+                min-height: 100vh;
+            }
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+            h2 {
+                color: #60a5fa;
+                margin: 40px 0 20px 0;
+                padding: 15px;
+                background: rgba(30, 41, 59, 0.8);
+                border-left: 4px solid #3b82f6;
+                border-radius: 4px;
+                font-size: 1.8em;
+            }
+            h3 {
+                color: #93c5fd;
+                margin: 30px 0 15px 0;
+                font-size: 1.2em;
+                padding: 10px 15px;
+                background: rgba(30, 41, 59, 0.6);
+                border-radius: 4px;
             }
             table {
                 border-collapse: collapse;
                 width: 100%;
-                font-size: 13px;
-            }
-            th, td {
-                border: 1px solid #334155;
-                padding: 8px;
-                text-align: left;
-                vertical-align: top;
+                margin: 20px 0;
+                font-size: 0.9em;
+                background: rgba(30, 41, 59, 0.9);
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             }
             th {
-                background: #1e293b;
+                background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+                color: #e0e7ff;
+                padding: 14px;
+                text-align: left;
+                font-weight: 600;
+                border-bottom: 2px solid #3b82f6;
+            }
+            td {
+                padding: 12px 14px;
+                border-bottom: 1px solid #334155;
+            }
+            tr:hover {
+                background: rgba(59, 130, 246, 0.1);
+            }
+            tr:last-child td {
+                border-bottom: none;
             }
             a {
+                color: #60a5fa;
+                text-decoration: none;
+                font-weight: 500;
+                padding: 4px 8px;
+                border-radius: 3px;
+                background: rgba(96, 165, 250, 0.1);
+                transition: all 0.2s ease;
+            }
+            a:hover {
                 color: #93c5fd;
+                background: rgba(96, 165, 250, 0.2);
+            }
+            .success {
+                color: #86efac;
+                font-weight: 600;
+            }
+            .failed {
+                color: #f87171;
+                font-weight: 600;
+            }
+            .unknown {
+                color: #fbbf24;
+                font-weight: 600;
+            }
+            .api-section {
+                background: rgba(30, 41, 59, 0.8);
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+                border-left: 4px solid #8b5cf6;
+            }
+            .api-section strong {
+                color: #a78bfa;
+            }
+            .status-good {
+                color: #86efac;
+            }
+            .status-bad {
+                color: #f87171;
+            }
+            .status-warn {
+                color: #fbbf24;
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+            .header h1 {
+                color: #60a5fa;
+                margin-bottom: 10px;
+                font-size: 2.5em;
+            }
+            .header p {
+                color: #94a3b8;
+                font-size: 1.1em;
             }
         </style>
     </head>
     <body>
-        <h2>Daily Upload Report</h2>
-        <h1>Daily Upload Report</h1>
-<p>Generated: 2026-04-17 01:22 UTC</p>
-<p>Repositories: 3</p>
-<h3>Learn Quran Daily (Arabic)</h3>
+        <div class="container">
+            <div class="header">
+                <h1>Daily Upload Report</h1>
+                <p>Quran Upload Automation Status</p>
+            </div>
+            <p>Generated: 2026-04-17 11:11 UTC</p>
+<h2>Learn Quran Daily (Arabic)</h2>
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Run #</th>
 <th>Workflow</th>
-<th>Status</th>
-<th>Date</th>
 <th>IG Ayah</th>
-<th>IG API</th>
 <th>IG Post</th>
-<th>FB Ayah</th>
-<th>FB API</th>
-<th>FB Post</th>
+<th>IG Date</th>
 <th>YT Ayah</th>
-<th>YT API</th>
 <th>YT Post</th>
+<th>YT Date</th>
+<th>FB Ayah</th>
+<th>FB Post</th>
+<th>FB Date</th>
 <th>Link</th>
 </tr>
 </thead>
 <tbody>
 <tr>
+<td style="text-align: right;">#1057</td>
+<td>Quran Verse Generator (IG + YT)</td>
+<td>11:57</td>
+<td>SUCCESS</td>
+<td>2026-04-17 14:37 IST</td>
+<td>2:33</td>
+<td>SUCCESS</td>
+<td>2026-04-17 14:40 IST</td>
+<td>2:33</td>
+<td>SUCCESS</td>
+<td>2026-04-17 14:40 IST</td>
+<td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24556982234">View</a></td>
+</tr>
+<tr>
 <td style="text-align: right;">#1056</td>
 <td>Quran Verse Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-17 04:39 IST</td>
 <td>11:56</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 16:06 IST)</td>
-<td>SUCCESS (2026-04-17 04:46 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 04:46 IST</td>
 <td>2:32</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 16:06 IST)</td>
-<td>SUCCESS (2026-04-17 04:48 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 04:48 IST</td>
 <td>2:32</td>
-<td>SUCCESS (expired=no, exp=2026-04-17 05:46 IST)</td>
-<td>SUCCESS (2026-04-17 04:48 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 04:48 IST</td>
 <td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24538703758">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1055</td>
 <td>Quran Verse Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-17 00:22 IST</td>
 <td>11:56</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 16:06 IST)</td>
-<td>SUCCESS (2026-04-17 00:30 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 00:30 IST</td>
 <td>2:32</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 16:06 IST)</td>
-<td>SUCCESS (2026-04-17 00:32 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 00:32 IST</td>
 <td>2:32</td>
-<td>SUCCESS (expired=no, exp=2026-04-17 01:17 IST)</td>
-<td>SUCCESS (2026-04-17 00:32 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 00:32 IST</td>
 <td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24528141581">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1054</td>
 <td>Quran Verse Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-16 23:08 IST</td>
 <td>11:55</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 16:06 IST)</td>
-<td>SUCCESS (2026-04-16 23:13 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 23:13 IST</td>
 <td>2:31</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 16:06 IST)</td>
-<td>SUCCESS (2026-04-16 23:16 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 23:16 IST</td>
 <td>2:31</td>
-<td>SUCCESS (expired=no, exp=2026-04-17 00:13 IST)</td>
-<td>SUCCESS (2026-04-16 23:16 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 23:16 IST</td>
 <td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24524888884">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1053</td>
 <td>Quran Verse Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-16 21:29 IST</td>
 <td>11:55</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 16:06 IST)</td>
-<td>SUCCESS (2026-04-16 21:34 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 21:34 IST</td>
 <td>2:31</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 16:06 IST)</td>
-<td>SUCCESS (2026-04-16 21:37 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 21:37 IST</td>
 <td>2:31</td>
-<td>SUCCESS (expired=no, exp=2026-04-16 22:34 IST)</td>
-<td>SUCCESS (2026-04-16 21:37 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 21:37 IST</td>
 <td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24520457168">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1052</td>
 <td>Quran Verse Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-16 14:53 IST</td>
 <td>11:54</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 16:06 IST)</td>
-<td>SUCCESS (2026-04-16 14:59 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 14:59 IST</td>
 <td>2:30</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 16:06 IST)</td>
-<td>SUCCESS (2026-04-16 15:02 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 15:02 IST</td>
 <td>2:30</td>
-<td>SUCCESS (expired=no, exp=2026-04-16 15:59 IST)</td>
-<td>SUCCESS (2026-04-16 15:02 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 15:02 IST</td>
 <td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24502529201">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1051</td>
 <td>Quran Verse Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-16 14:33 IST</td>
 <td>11:54</td>
 <td>SUCCESS</td>
-<td>SUCCESS</td>
-<td>11:54</td>
-<td>SUCCESS (exp=0)</td>
-<td>SUCCESS</td>
+<td>?</td>
 <td>11:54</td>
 <td>SUCCESS</td>
+<td>?</td>
+<td>11:54</td>
 <td>SUCCESS</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24501689542">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1050</td>
 <td>Quran Verse Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-16 04:39 IST</td>
 <td>11:53</td>
 <td>SUCCESS</td>
-<td>SUCCESS</td>
-<td>11:53</td>
-<td>SUCCESS (exp=0)</td>
-<td>SUCCESS</td>
+<td>?</td>
 <td>11:53</td>
 <td>SUCCESS</td>
+<td>?</td>
+<td>11:53</td>
 <td>SUCCESS</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24483055535">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1049</td>
 <td>Quran Verse Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-16 00:47 IST</td>
 <td>?</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td>?</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td>?</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24473528170">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1048</td>
 <td>Quran Verse Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-15 21:13 IST</td>
 <td>11:52</td>
 <td>SUCCESS</td>
-<td>SUCCESS</td>
-<td>11:52</td>
-<td>SUCCESS (exp=0)</td>
-<td>SUCCESS</td>
+<td>?</td>
 <td>11:52</td>
 <td>SUCCESS</td>
+<td>?</td>
+<td>11:52</td>
 <td>SUCCESS</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24463895706">View</a></td>
-</tr>
-<tr>
-<td style="text-align: right;">#1047</td>
-<td>Quran Verse Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-15 14:34 IST</td>
-<td>11:51</td>
-<td>SUCCESS</td>
-<td>SUCCESS</td>
-<td>11:51</td>
-<td>SUCCESS (exp=0)</td>
-<td>SUCCESS</td>
-<td>11:51</td>
-<td>SUCCESS</td>
-<td>SUCCESS</td>
-<td><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24445933103">View</a></td>
 </tr>
 </tbody>
 </table>
-<h3>Learn Urdu Quran Daily</h3>
+<h3>API Status</h3>
+<p><strong>INSTAGRAM:</strong>
+- Status: <strong>SUCCESS</strong> | Token: <strong>unknown</strong>
+<strong>FACEBOOK:</strong>
+- Status: <strong>SUCCESS</strong> | Token: <strong>unknown</strong> | Expires: <strong>?</strong>
+<strong>YOUTUBE:</strong>
+- Status: <strong>SUCCESS</strong> | Token: <strong>unknown</strong></p>
+<h2>Learn Urdu Quran Daily</h2>
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Run #</th>
 <th>Workflow</th>
-<th>Status</th>
-<th>Date</th>
 <th>IG Ayah</th>
-<th>IG API</th>
 <th>IG Post</th>
-<th>FB Ayah</th>
-<th>FB API</th>
-<th>FB Post</th>
+<th>IG Date</th>
 <th>YT Ayah</th>
-<th>YT API</th>
 <th>YT Post</th>
+<th>YT Date</th>
+<th>FB Ayah</th>
+<th>FB Post</th>
+<th>FB Date</th>
 <th>Link</th>
 </tr>
 </thead>
@@ -239,150 +321,139 @@
 <tr>
 <td style="text-align: right;">#1159</td>
 <td>Urdu Quran Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-17 04:37 IST</td>
 <td>15:18</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:55 IST)</td>
-<td>SUCCESS (2026-04-17 04:42 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 04:42 IST</td>
 <td>2:32</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:55 IST)</td>
-<td>SUCCESS (2026-04-17 04:44 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 04:44 IST</td>
 <td>2:32</td>
-<td>SUCCESS (expired=no, exp=2026-04-17 05:42 IST)</td>
-<td>SUCCESS (2026-04-17 04:44 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 04:44 IST</td>
 <td><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24538634433">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1158</td>
 <td>Urdu Quran Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-17 01:06 IST</td>
 <td>15:18</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:55 IST)</td>
-<td>SUCCESS (2026-04-17 01:10 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 01:10 IST</td>
 <td>2:32</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:55 IST)</td>
-<td>SUCCESS (2026-04-17 01:12 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 01:11 IST</td>
 <td>2:32</td>
-<td>SUCCESS (expired=no, exp=2026-04-17 01:25 IST)</td>
-<td>SUCCESS (2026-04-17 01:11 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 01:12 IST</td>
 <td><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24530098808">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1157</td>
 <td>Urdu Quran Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-17 00:34 IST</td>
 <td>15:18</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:55 IST)</td>
-<td>SUCCESS (2026-04-17 00:38 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 00:38 IST</td>
 <td>2:32</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:55 IST)</td>
-<td>SUCCESS (2026-04-17 00:40 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 00:40 IST</td>
 <td>2:32</td>
-<td>SUCCESS (expired=no, exp=2026-04-17 01:25 IST)</td>
-<td>SUCCESS (2026-04-17 00:40 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 00:40 IST</td>
 <td><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24528700036">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1156</td>
 <td>Urdu Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-16 22:21 IST</td>
 <td>15:17</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:55 IST)</td>
-<td>SUCCESS (2026-04-16 22:24 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 22:24 IST</td>
+<td>15:17</td>
+<td>FAILED</td>
+<td>?</td>
 <td>15:17</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
-<td>15:17</td>
-<td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24522812526">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1155</td>
 <td>Urdu Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-16 17:06 IST</td>
 <td>15:16</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:55 IST)</td>
-<td>SUCCESS (2026-04-16 17:10 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 17:10 IST</td>
+<td>15:16</td>
+<td>FAILED</td>
+<td>?</td>
 <td>15:16</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
-<td>15:16</td>
-<td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24508035252">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1154</td>
 <td>Urdu Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-16 04:38 IST</td>
 <td>15:15</td>
 <td>SUCCESS</td>
-<td>SUCCESS</td>
-<td>15:15</td>
-<td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td>15:15</td>
 <td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
+<td>15:15</td>
+<td>UNKNOWN</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24483006471">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1153</td>
 <td>Urdu Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-15 22:03 IST</td>
 <td>?</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td>?</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td>?</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24466204414">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#1152</td>
 <td>Urdu Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-15 17:03 IST</td>
 <td>15:13</td>
 <td>SUCCESS</td>
-<td>SUCCESS</td>
-<td>15:13</td>
-<td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td>15:13</td>
 <td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
+<td>15:13</td>
+<td>UNKNOWN</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24452170509">View</a></td>
 </tr>
 </tbody>
 </table>
-<h3>Learn English Quran Daily</h3>
+<h3>API Status</h3>
+<p><strong>INSTAGRAM:</strong>
+- Status: <strong>SUCCESS</strong> | Token: <strong>unknown</strong>
+<strong>FACEBOOK:</strong>
+- Status: <strong>UNKNOWN</strong> | Token: <strong>unknown</strong>
+<strong>YOUTUBE:</strong>
+- Status: <strong>FAILED</strong> | Token: <strong>unknown</strong></p>
+<h2>Learn English Quran Daily</h2>
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Run #</th>
 <th>Workflow</th>
-<th>Status</th>
-<th>Date</th>
 <th>IG Ayah</th>
-<th>IG API</th>
 <th>IG Post</th>
-<th>FB Ayah</th>
-<th>FB API</th>
-<th>FB Post</th>
+<th>IG Date</th>
 <th>YT Ayah</th>
-<th>YT API</th>
 <th>YT Post</th>
+<th>YT Date</th>
+<th>FB Ayah</th>
+<th>FB Post</th>
+<th>FB Date</th>
 <th>Link</th>
 </tr>
 </thead>
@@ -390,133 +461,125 @@
 <tr>
 <td style="text-align: right;">#991</td>
 <td>English Quran Generator (IG + YT)</td>
-<td>PASSED</td>
-<td>2026-04-17 04:39 IST</td>
 <td>11:14</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:44 IST)</td>
-<td>SUCCESS (2026-04-17 04:45 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 04:45 IST</td>
 <td>2:32</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:44 IST)</td>
-<td>SUCCESS (2026-04-17 04:47 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 04:47 IST</td>
 <td>2:32</td>
-<td>SUCCESS (expired=no, exp=2026-04-17 05:45 IST)</td>
-<td>SUCCESS (2026-04-17 04:47 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 04:47 IST</td>
 <td><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24538708706">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#990</td>
 <td>English Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-17 01:09 IST</td>
 <td>11:14</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:44 IST)</td>
-<td>SUCCESS (2026-04-17 01:14 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 01:14 IST</td>
+<td>11:14</td>
+<td>FAILED</td>
+<td>?</td>
 <td>11:14</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
-<td>11:14</td>
-<td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24530187982">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#989</td>
 <td>English Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-17 00:50 IST</td>
 <td>11:14</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:44 IST)</td>
-<td>SUCCESS (2026-04-17 00:54 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-17 00:54 IST</td>
+<td>11:14</td>
+<td>FAILED</td>
+<td>?</td>
 <td>11:14</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
-<td>11:14</td>
-<td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24529358504">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#988</td>
 <td>English Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-16 22:24 IST</td>
 <td>11:13</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:44 IST)</td>
-<td>SUCCESS (2026-04-16 22:29 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 22:29 IST</td>
+<td>11:13</td>
+<td>FAILED</td>
+<td>?</td>
 <td>11:13</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
-<td>11:13</td>
-<td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24522940155">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#987</td>
 <td>English Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-16 17:05 IST</td>
 <td>11:12</td>
-<td>SUCCESS (token=valid, exp=unknown, data_exp=2026-07-03 17:44 IST)</td>
-<td>SUCCESS (2026-04-16 17:13 IST)</td>
+<td>SUCCESS</td>
+<td>2026-04-16 17:13 IST</td>
+<td>11:12</td>
+<td>FAILED</td>
+<td>?</td>
 <td>11:12</td>
 <td>UNKNOWN</td>
-<td>UNKNOWN</td>
-<td>11:12</td>
-<td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24507977259">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#986</td>
 <td>English Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-16 04:39 IST</td>
 <td>11:11</td>
 <td>SUCCESS</td>
-<td>SUCCESS</td>
-<td>11:11</td>
-<td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td>11:11</td>
 <td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
+<td>11:11</td>
+<td>UNKNOWN</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24483061034">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#985</td>
 <td>English Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-15 22:05 IST</td>
 <td>11:10</td>
 <td>SUCCESS</td>
-<td>SUCCESS</td>
-<td>11:10</td>
-<td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td>11:10</td>
 <td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
+<td>11:10</td>
+<td>UNKNOWN</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24466311681">View</a></td>
 </tr>
 <tr>
 <td style="text-align: right;">#984</td>
 <td>English Quran Generator (IG + YT)</td>
-<td>FAILED</td>
-<td>2026-04-15 17:01 IST</td>
 <td>11:9</td>
 <td>SUCCESS</td>
-<td>SUCCESS</td>
-<td>11:9</td>
-<td>UNKNOWN</td>
-<td>UNKNOWN</td>
+<td>?</td>
 <td>11:9</td>
 <td>FAILED</td>
-<td>FAILED</td>
+<td>?</td>
+<td>11:9</td>
+<td>UNKNOWN</td>
+<td>?</td>
 <td><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24452095211">View</a></td>
 </tr>
 </tbody>
 </table>
+<h3>API Status</h3>
+<p><strong>INSTAGRAM:</strong>
+- Status: <strong>SUCCESS</strong> | Token: <strong>unknown</strong>
+<strong>FACEBOOK:</strong>
+- Status: <strong>UNKNOWN</strong> | Token: <strong>unknown</strong>
+<strong>YOUTUBE:</strong>
+- Status: <strong>FAILED</strong> | Token: <strong>unknown</strong></p>
+        </div>
     </body>
     </html>
     
