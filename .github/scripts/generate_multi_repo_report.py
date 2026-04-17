@@ -494,7 +494,6 @@ def markdown_to_html(md: str):
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             }}
             th {{
-                background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
                 color: #e0e7ff;
                 padding: clamp(8px, 2vw, 14px);
                 text-align: left;
@@ -502,12 +501,58 @@ def markdown_to_html(md: str):
                 border-bottom: 2px solid #3b82f6;
                 white-space: nowrap;
             }}
+            /* Instagram header (cols 3-5) */
+            th:nth-child(3), th:nth-child(4), th:nth-child(5) {{
+                background: linear-gradient(135deg, #C13584 0%, #a01f6a 100%);
+                border-right: 1px solid rgba(255,255,255,0.1);
+            }}
+            /* YouTube header (cols 6-8) */
+            th:nth-child(6), th:nth-child(7), th:nth-child(8) {{
+                background: linear-gradient(135deg, #FF0000 0%, #cc0000 100%);
+                border-right: 1px solid rgba(255,255,255,0.1);
+            }}
+            /* Facebook header (cols 9-11) */
+            th:nth-child(9), th:nth-child(10), th:nth-child(11) {{
+                background: linear-gradient(135deg, #1877F2 0%, #0a66c2 100%);
+                border-right: 1px solid rgba(255,255,255,0.1);
+            }}
+            /* Run # and Workflow headers */
+            th:nth-child(1), th:nth-child(2) {{
+                background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+                border-right: 2px solid rgba(255,255,255,0.2);
+            }}
+            /* Link header */
+            th:nth-child(12) {{
+                background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+                border-left: 2px solid rgba(255,255,255,0.2);
+            }}
             td {{
                 padding: clamp(8px, 2vw, 12px);
                 border-bottom: 1px solid #334155;
             }}
-            tr:hover {{
-                background: rgba(59, 130, 246, 0.1);
+            /* Instagram cells (cols 3-5) */
+            td:nth-child(3), td:nth-child(4), td:nth-child(5) {{
+                background: rgba(193, 53, 132, 0.08);
+                border-right: 1px solid rgba(193, 53, 132, 0.2);
+            }}
+            /* YouTube cells (cols 6-8) */
+            td:nth-child(6), td:nth-child(7), td:nth-child(8) {{
+                background: rgba(255, 0, 0, 0.08);
+                border-right: 1px solid rgba(255, 0, 0, 0.2);
+            }}
+            /* Facebook cells (cols 9-11) */
+            td:nth-child(9), td:nth-child(10), td:nth-child(11) {{
+                background: rgba(24, 119, 242, 0.08);
+                border-right: 1px solid rgba(24, 119, 242, 0.2);
+            }}
+            tr:hover td:nth-child(3), tr:hover td:nth-child(4), tr:hover td:nth-child(5) {{
+                background: rgba(193, 53, 132, 0.15);
+            }}
+            tr:hover td:nth-child(6), tr:hover td:nth-child(7), tr:hover td:nth-child(8) {{
+                background: rgba(255, 0, 0, 0.15);
+            }}
+            tr:hover td:nth-child(9), tr:hover td:nth-child(10), tr:hover td:nth-child(11) {{
+                background: rgba(24, 119, 242, 0.15);
             }}
             tr:last-child td {{
                 border-bottom: none;
