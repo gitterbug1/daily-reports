@@ -350,16 +350,16 @@ def generate_repo_report(repo: str) -> str:
     if not runs:
         return f"\n### {display_name}\n\nNo workflow runs.\n"
 
-    report = f"\n### {display_name}\n\n"
-    report += "| Run # | Workflow | Status | Date | IG Ayah | IG API | IG Post | FB Ayah | FB API | FB Post | YT Ayah | YT API | YT Post | Link |\n"
-    report += "|------:|----------|--------|------|---------|--------|---------|---------|--------|---------|---------|--------|---------|------|\n"
+    report = f"\n## {display_name}\n\n"
+    report += "| Run # | Workflow | IG Ayah | IG Post | IG Date | YT Ayah | YT Post | YT Date | FB Ayah | FB Post | FB Date | Link |\n"
+    report += "|------:|----------|---------|---------|---------|---------|---------|---------|---------|---------|---------|------|\n"
+
+    api_summary = {"instagram": {}, "facebook": {}, "youtube": {}}
 
     for run in runs[:10]:
         run_id = run["id"]
         run_number = run["run_number"]
         workflow_name = run.get("name", "Workflow")
-        status = "PASSED" if run.get("conclusion") == "success" else "FAILED"
-        created_at = to_ist_label(run.get("created_at"))
 
         jobs = get_jobs_for_run(repo, run_id)
         logs_list: List[str] = []
@@ -374,27 +374,60 @@ def generate_repo_report(repo: str) -> str:
         summary = build_run_summary(events, logs_list, repo)
         link = f"https://github.com/{repo}/actions/runs/{run_id}"
 
+        # Extract post status and date for each platform
+        ig_post_event = summary['platforms']['instagram']['post_result']
+        yt_post_event = summary['platforms']['youtube']['post_result']
+        fb_post_event = summary['platforms']['facebook']['post_result']
+
+        ig_post_status = format_status(ig_post_event.get("status")) if ig_post_event else "UNKNOWN"
+        yt_post_status = format_status(yt_post_event.get("status")) if yt_post_event else "UNKNOWN"
+        fb_post_status = format_status(fb_post_event.get("status")) if fb_post_event else "UNKNOWN"
+
+        ig_date = to_ist_label(ig_post_event.get("posted_at") or ig_post_event.get("logged_at")) if ig_post_event else "?"
+        yt_date = to_ist_label(yt_post_event.get("posted_at") or yt_post_event.get("logged_at")) if yt_post_event else "?"
+        fb_date = to_ist_label(fb_post_event.get("posted_at") or fb_post_event.get("logged_at")) if fb_post_event else "?"
+
+        # Store API info for summary
+        for platform in ["instagram", "facebook", "youtube"]:
+            api_event = summary['platforms'][platform]['api_check']
+            if api_event:
+                api_summary[platform][run_number] = api_event
+
         report += (
-            f"| #{run_number} | {workflow_name} | {status} | {created_at} | "
+            f"| #{run_number} | {workflow_name} | "
             f"{summary['platforms']['instagram']['ayah_key']} | "
-            f"{format_api_cell(summary['platforms']['instagram']['api_check'])} | "
-            f"{format_post_cell(summary['platforms']['instagram']['post_result'])} | "
-            f"{summary['platforms']['facebook']['ayah_key']} | "
-            f"{format_api_cell(summary['platforms']['facebook']['api_check'])} | "
-            f"{format_post_cell(summary['platforms']['facebook']['post_result'])} | "
+            f"{ig_post_status} | {ig_date} | "
             f"{summary['platforms']['youtube']['ayah_key']} | "
-            f"{format_api_cell(summary['platforms']['youtube']['api_check'])} | "
-            f"{format_post_cell(summary['platforms']['youtube']['post_result'])} | "
+            f"{yt_post_status} | {yt_date} | "
+            f"{summary['platforms']['facebook']['ayah_key']} | "
+            f"{fb_post_status} | {fb_date} | "
             f"[View]({link}) |\n"
         )
 
+    # Add API status section
+    report += "\n### API Status\n\n"
+    
+    for platform in ["instagram", "facebook", "youtube"]:
+        report += f"**{platform.upper()}:**\n"
+        if api_summary[platform]:
+            latest_api = list(api_summary[platform].values())[-1]
+            status = format_status(latest_api.get("status"))
+            token_status = latest_api.get("token_status", "unknown")
+            token_expires = latest_api.get("token_expires_at", "")
+            
+            if token_expires:
+                token_exp_label = to_ist_label(token_expires)
+                report += f"- Status: **{status}** | Token: **{token_status}** | Expires: **{token_exp_label}**\n"
+            else:
+                report += f"- Status: **{status}** | Token: **{token_status}**\n"
+        else:
+            report += f"- Status: **NO DATA**\n"
+    
     return report
 
 
 def generate_full_report():
-    report = "# Daily Upload Report\n\n"
-    report += f"Generated: {now_utc().strftime('%Y-%m-%d %H:%M UTC')}\n\n"
-    report += f"Repositories: {len(REPOS)}\n"
+    report = f"Generated: {now_utc().strftime('%Y-%m-%d %H:%M UTC')}\n\n"
 
     for repo in REPOS:
         report += generate_repo_report(repo)
@@ -409,35 +442,137 @@ def markdown_to_html(md: str):
     return f"""
     <html>
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+            * {{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }}
             body {{
-                font-family: Arial;
-                background: #0f172a;
-                color: white;
-                padding: 20px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                color: #e2e8f0;
+                padding: 40px 20px;
+                min-height: 100vh;
+            }}
+            .container {{
+                max-width: 1400px;
+                margin: 0 auto;
+            }}
+            h2 {{
+                color: #60a5fa;
+                margin: 40px 0 20px 0;
+                padding: 15px;
+                background: rgba(30, 41, 59, 0.8);
+                border-left: 4px solid #3b82f6;
+                border-radius: 4px;
+                font-size: 1.8em;
+            }}
+            h3 {{
+                color: #93c5fd;
+                margin: 30px 0 15px 0;
+                font-size: 1.2em;
+                padding: 10px 15px;
+                background: rgba(30, 41, 59, 0.6);
+                border-radius: 4px;
             }}
             table {{
                 border-collapse: collapse;
                 width: 100%;
-                font-size: 13px;
-            }}
-            th, td {{
-                border: 1px solid #334155;
-                padding: 8px;
-                text-align: left;
-                vertical-align: top;
+                margin: 20px 0;
+                font-size: 0.9em;
+                background: rgba(30, 41, 59, 0.9);
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             }}
             th {{
-                background: #1e293b;
+                background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+                color: #e0e7ff;
+                padding: 14px;
+                text-align: left;
+                font-weight: 600;
+                border-bottom: 2px solid #3b82f6;
+            }}
+            td {{
+                padding: 12px 14px;
+                border-bottom: 1px solid #334155;
+            }}
+            tr:hover {{
+                background: rgba(59, 130, 246, 0.1);
+            }}
+            tr:last-child td {{
+                border-bottom: none;
             }}
             a {{
+                color: #60a5fa;
+                text-decoration: none;
+                font-weight: 500;
+                padding: 4px 8px;
+                border-radius: 3px;
+                background: rgba(96, 165, 250, 0.1);
+                transition: all 0.2s ease;
+            }}
+            a:hover {{
                 color: #93c5fd;
+                background: rgba(96, 165, 250, 0.2);
+            }}
+            .success {{
+                color: #86efac;
+                font-weight: 600;
+            }}
+            .failed {{
+                color: #f87171;
+                font-weight: 600;
+            }}
+            .unknown {{
+                color: #fbbf24;
+                font-weight: 600;
+            }}
+            .api-section {{
+                background: rgba(30, 41, 59, 0.8);
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+                border-left: 4px solid #8b5cf6;
+            }}
+            .api-section strong {{
+                color: #a78bfa;
+            }}
+            .status-good {{
+                color: #86efac;
+            }}
+            .status-bad {{
+                color: #f87171;
+            }}
+            .status-warn {{
+                color: #fbbf24;
+            }}
+            .header {{
+                text-align: center;
+                margin-bottom: 40px;
+            }}
+            .header h1 {{
+                color: #60a5fa;
+                margin-bottom: 10px;
+                font-size: 2.5em;
+            }}
+            .header p {{
+                color: #94a3b8;
+                font-size: 1.1em;
             }}
         </style>
     </head>
     <body>
-        <h2>Daily Upload Report</h2>
-        {body}
+        <div class="container">
+            <div class="header">
+                <h1>Daily Upload Report</h1>
+                <p>Quran Upload Automation Status</p>
+            </div>
+            {body}
+        </div>
     </body>
     </html>
     """
