@@ -103,7 +103,7 @@ def to_ist_label(value: str | None) -> str:
     dt = parse_iso_datetime(value)
     if not dt:
         return "?"
-    return dt.astimezone(IST).strftime("%Y-%m-%d %H:%M IST")
+    return dt.astimezone(IST).strftime("%d/%m %I:%M %p")
 
 
 def parse_upload_events(logs: str) -> List[Dict]:
