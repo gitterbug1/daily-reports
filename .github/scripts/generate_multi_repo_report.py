@@ -41,6 +41,15 @@ def get_repo_display_name(repo: str) -> str:
     }.get(repo, repo)
 
 
+def get_workflow_display_name(repo: str) -> str:
+    """Get display name for workflow based on repo"""
+    return {
+        "iwilllearnquran/learnqurandaily": "Quran Verse Generator (IG + YT)",
+        "iwilllearnuduquran/learnurduqurandaily": "Urdu Quran Generator (IG + YT)",
+        "iwilllearnenglishquran/learnenglishqurandaily": "English Quran Generator (IG + YT)",
+    }.get(repo, "Quran Generator")
+
+
 def get_workflow_runs(repo: str, hours: int = 48) -> List[Dict]:
     url = f"https://api.github.com/repos/{repo}/actions/runs"
     since = (now_utc() - timedelta(hours=hours)).isoformat()
@@ -351,8 +360,8 @@ def generate_repo_report(repo: str) -> str:
         return f"\n### {display_name}\n\nNo workflow runs.\n"
 
     report = f"\n## {display_name}\n\n"
-    report += '| Run # | Workflow | IG Ayah | IG Post | IG Date | YT Ayah | YT Post | YT Date | FB Ayah | FB Post | FB Date | Link |\n'
-    report += "|------:|----------|---------|---------|---------|---------|---------|---------|---------|---------|---------|------|\n"
+    report += '| Run # | IG Ayah | IG Post | IG Date | FB Ayah | FB Post | FB Date | YT Ayah | YT Post | YT Date | Link |\n'
+    report += "|------:|---------|---------|---------|---------|---------|---------|---------|---------|---------|------|\n"
 
     api_summary = {"instagram": {}, "facebook": {}, "youtube": {}}
 
@@ -399,13 +408,13 @@ def generate_repo_report(repo: str) -> str:
                 api_summary[platform][run_number] = api_event
 
         report += (
-            f"| #{run_number} | {workflow_name} | "
+            f"| #{run_number} | "
             f"{summary['platforms']['instagram']['ayah_key']} | "
             f"{ig_post_colored} | {ig_date} | "
-            f"{summary['platforms']['youtube']['ayah_key']} | "
-            f"{yt_post_colored} | {yt_date} | "
             f"{summary['platforms']['facebook']['ayah_key']} | "
             f"{fb_post_colored} | {fb_date} | "
+            f"{summary['platforms']['youtube']['ayah_key']} | "
+            f"{yt_post_colored} | {yt_date} | "
             f"[View]({link}) |\n"
         )
 
@@ -514,15 +523,15 @@ def markdown_to_html(md: str):
                 background: linear-gradient(135deg, #DA88B3 0%, #C8739E 100%);
                 border-right: 1px solid rgba(218, 136, 179, 0.3);
             }}
-            /* YouTube header (cols 6-8) */
+            /* Facebook header (cols 6-8) */
             th:nth-child(6), th:nth-child(7), th:nth-child(8) {{
-                background: linear-gradient(135deg, #FF7F7F 0%, #E85555 100%);
-                border-right: 1px solid rgba(255, 127, 127, 0.3);
-            }}
-            /* Facebook header (cols 9-11) */
-            th:nth-child(9), th:nth-child(10), th:nth-child(11) {{
                 background: linear-gradient(135deg, #6BA3E5 0%, #5A8FD1 100%);
                 border-right: 1px solid rgba(107, 163, 229, 0.3);
+            }}
+            /* YouTube header (cols 9-11) */
+            th:nth-child(9), th:nth-child(10), th:nth-child(11) {{
+                background: linear-gradient(135deg, #FF7F7F 0%, #E85555 100%);
+                border-right: 1px solid rgba(255, 127, 127, 0.3);
             }}
             /* Run # and Workflow headers */
             th:nth-child(1), th:nth-child(2) {{
@@ -543,24 +552,24 @@ def markdown_to_html(md: str):
                 background: rgba(218, 136, 179, 0.06);
                 border-right: 1px solid rgba(218, 136, 179, 0.15);
             }}
-            /* YouTube cells (cols 6-8) */
+            /* Facebook cells (cols 6-8) */
             td:nth-child(6), td:nth-child(7), td:nth-child(8) {{
-                background: rgba(255, 127, 127, 0.06);
-                border-right: 1px solid rgba(255, 127, 127, 0.15);
-            }}
-            /* Facebook cells (cols 9-11) */
-            td:nth-child(9), td:nth-child(10), td:nth-child(11) {{
                 background: rgba(107, 163, 229, 0.06);
                 border-right: 1px solid rgba(107, 163, 229, 0.15);
+            }}
+            /* YouTube cells (cols 9-11) */
+            td:nth-child(9), td:nth-child(10), td:nth-child(11) {{
+                background: rgba(255, 127, 127, 0.06);
+                border-right: 1px solid rgba(255, 127, 127, 0.15);
             }}
             tr:hover td:nth-child(3), tr:hover td:nth-child(4), tr:hover td:nth-child(5) {{
                 background: rgba(218, 136, 179, 0.12);
             }}
             tr:hover td:nth-child(6), tr:hover td:nth-child(7), tr:hover td:nth-child(8) {{
-                background: rgba(255, 127, 127, 0.12);
+                background: rgba(107, 163, 229, 0.12);
             }}
             tr:hover td:nth-child(9), tr:hover td:nth-child(10), tr:hover td:nth-child(11) {{
-                background: rgba(107, 163, 229, 0.12);
+                background: rgba(255, 127, 127, 0.12);
             }}
             tr:last-child td {{
                 border-bottom: none;
