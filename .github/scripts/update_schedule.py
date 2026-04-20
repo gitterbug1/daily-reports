@@ -39,9 +39,13 @@ PLATFORM_FILE = {
     "yt": "yt_schedule.xlsx",
 }
 
-# Part hour windows (IST) — mirrors daily_quran.py defaults.
-PART2_START_HOUR = 10
-PART3_START_HOUR = 17
+
+# Per-language part hour windows (IST)
+PART_HOURS = {
+    "ar": (7, 14),   # Arabic: Part 2 at 7, Part 3 at 14
+    "en": (10, 15),  # English: Part 2 at 10, Part 3 at 15
+    "ur": (10, 15),  # Urdu:    Part 2 at 10, Part 3 at 15
+}
 
 # Ayahs per surah (1-indexed; total = 6236).
 AYAH_COUNTS = [
@@ -60,10 +64,10 @@ AYAH_COUNTS = [
 ]
 
 
-def current_part(now_ist: datetime) -> int:
-    if now_ist.hour < PART2_START_HOUR:
+def current_part(now_ist: datetime, part2_hour: int, part3_hour: int) -> int:
+    if now_ist.hour < part2_hour:
         return 1
-    if now_ist.hour < PART3_START_HOUR:
+    if now_ist.hour < part3_hour:
         return 2
     return 3
 
@@ -95,16 +99,25 @@ def update_schedule(xlsx_path: Path, start_surah: int, start_ayah: int) -> None:
     ist = ZoneInfo("Asia/Kolkata")
     now = datetime.now(ist)
     today = pd.Timestamp(now.date())
-    cur_part = current_part(now)
+    # Detect language from file path (ar/en/ur)
+    lang = None
+    for k, v in FOLDERS.items():
+        if str(v) in str(xlsx_path):
+            lang = k
+            break
+    if lang is None:
+        lang = "ar"  # fallback default
+    part2_hour, part3_hour = PART_HOURS.get(lang, (10, 17))
+    cur_part = current_part(now, part2_hour, part3_hour)
 
-    # First row strictly after (today, current_part).
-    mask_future = (df["Date"] > today) | ((df["Date"] == today) & (df["PartNum"] > cur_part))
-    future_idx = df.index[mask_future]
-    if len(future_idx) == 0:
+    # Find the next run: if the current part's scheduled time has not yet elapsed, include it
+    mask_next = (df["Date"] > today) | ((df["Date"] == today) & (df["PartNum"] >= cur_part))
+    next_idx = df.index[mask_next]
+    if len(next_idx) == 0:
         print(f"  [{xlsx_path.name}] no future rows to update — schedule exhausted.")
         return None
 
-    start_idx = future_idx[0]
+    start_idx = next_idx[0]
 
     s, a = start_surah, start_ayah
     n = 0
