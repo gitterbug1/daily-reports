@@ -30,6 +30,17 @@ except ImportError:
 QURAN_API = "https://api.quran.com/api/v4"
 AUDIO_API = "https://api.alquran.cloud/v1"
 VIDEO_FPS = 30
+VIDEO_WIDTH = 1080
+VIDEO_HEIGHT = 1920
+POSTER_SUPERSAMPLE = 2
+POSTER_RENDER_WIDTH = VIDEO_WIDTH * POSTER_SUPERSAMPLE
+POSTER_RENDER_HEIGHT = VIDEO_HEIGHT * POSTER_SUPERSAMPLE
+VIDEO_CRF = "15"
+VIDEO_PRESET = "slower"
+VIDEO_BITRATE = "12000k"
+VIDEO_MAXRATE = "18000k"
+VIDEO_BUFSIZE = "24000k"
+AUDIO_BITRATE = "256k"
 THUMBNAIL_INTRO_SECONDS = 0.2
 
 # Language configs (exact from production)
@@ -194,13 +205,18 @@ def get_cumulative_ayah_number(surah, ayah):
     return current_ayah_position, total_ayahs
 
 
+def scaled(value):
+    return int(round(value * POSTER_SUPERSAMPLE))
+
+
 def create_poster(surah, ayah, arabic, english, surah_name, surah_name_arabic, en_translated_surah_name, background_path, output_path, fonts_dir):
     """EXACT from production daily_quran.py"""
     try:
-        poster_width, poster_height = 1080, 1920
-        
+        poster_width, poster_height = POSTER_RENDER_WIDTH, POSTER_RENDER_HEIGHT
+
         img = Image(filename=background_path)
         img.depth = 32
+        img.resize(poster_width, poster_height)
         draw = Drawing()
 
         # Font paths
@@ -210,57 +226,57 @@ def create_poster(surah, ayah, arabic, english, surah_name, surah_name_arabic, e
 
         # Calculate font size based on text width (exact from production)
         draw.font = arabic_font
-        draw.font_size = 55
+        draw.font_size = scaled(55)
         arabic_text_width = draw.get_font_metrics(img, arabic, True).text_width
 
-        if arabic_text_width > 2000:
-            arabic_font_size = 40
-            english_font_size = 20
-        elif 1000 < arabic_text_width < 2000:
-            arabic_font_size = 45
-            english_font_size = 25
-        elif 500 < arabic_text_width < 1000:
-            arabic_font_size = 55
-            english_font_size = 25
+        if arabic_text_width > scaled(2000):
+            arabic_font_size = scaled(40)
+            english_font_size = scaled(20)
+        elif scaled(1000) < arabic_text_width < scaled(2000):
+            arabic_font_size = scaled(45)
+            english_font_size = scaled(25)
+        elif scaled(500) < arabic_text_width < scaled(1000):
+            arabic_font_size = scaled(55)
+            english_font_size = scaled(25)
         else:
-            arabic_font_size = 65
-            english_font_size = 30
+            arabic_font_size = scaled(65)
+            english_font_size = scaled(30)
 
         # ===== TITLE SECTION =====
         # Arabic Surah Name
         draw.font = arabic_font
         draw.font_style = 'italic'
-        draw.font_size = 75
+        draw.font_size = scaled(75)
         draw.font_weight = 700
         draw.fill_color = Color("#FFFFFF")
         arabic_text_width = draw.get_font_metrics(img, surah_name_arabic, True).text_width
         arabic_x_position = (poster_width // 2) - (arabic_text_width // 2)
-        draw.text(int(arabic_x_position), 145, surah_name_arabic)
+        draw.text(int(arabic_x_position), scaled(145), surah_name_arabic)
 
         # English Surah Name
         draw.font = english_font
-        draw.font_size = 25
+        draw.font_size = scaled(25)
         draw.fill_color = Color("#FFFFFF")
         english_text_width = draw.get_font_metrics(img, f"{surah_name} ({en_translated_surah_name})", True).text_width
         english_x_position = (poster_width // 2) - (english_text_width // 2)
-        draw.text(int(english_x_position), 195, f"{surah_name} ({en_translated_surah_name})")
+        draw.text(int(english_x_position), scaled(195), f"{surah_name} ({en_translated_surah_name})")
 
         # Verse reference (exact format from production)
         draw.font = english_font
-        draw.font_size = 25
+        draw.font_size = scaled(25)
         draw.fill_color = Color("#FFFFFF")
         surah_text = f"(surah {surah} : {ayah} ayah)"
         surah_width = draw.get_font_metrics(img, surah_text, True).text_width
         surah_position = (poster_width // 2) - (surah_width // 2)
-        draw.text(int(surah_position), 225, surah_text)
+        draw.text(int(surah_position), scaled(225), surah_text)
 
         # ===== PROGRESS BAR =====
         current_ayah_position, total_ayahs = get_cumulative_ayah_number(surah, ayah)
         completed_percentage = round((current_ayah_position / total_ayahs) * 100, 2)
-        progress_bar_width = int((current_ayah_position / total_ayahs) * 900)
+        progress_bar_width = int((current_ayah_position / total_ayahs) * scaled(900))
 
-        bar_x, bar_y, bar_height = 90, 260, 10
-        full_bar_width = 900
+        bar_x, bar_y, bar_height = scaled(90), scaled(260), scaled(10)
+        full_bar_width = scaled(900)
 
         # Bar background
         draw.fill_color = Color("rgba(166, 166, 166, 0.5)")
@@ -273,11 +289,11 @@ def create_poster(surah, ayah, arabic, english, surah_name, surah_name_arabic, e
         # Progress percentage (exact format from production)
         progress_text = f"(Quran Completion: {completed_percentage}%)"
         draw.font = english_font_small
-        draw.font_size = 22
+        draw.font_size = scaled(22)
         draw.fill_color = Color("#FFFFFF")
         text_width = draw.get_font_metrics(img, progress_text, True).text_width
         text_x_position = (poster_width // 2) - (text_width // 2)
-        draw.text(int(text_x_position), bar_y + 32, progress_text)
+        draw.text(int(text_x_position), bar_y + scaled(32), progress_text)
 
         # ===== ARABIC TEXT =====
         draw.font = arabic_font
@@ -286,18 +302,18 @@ def create_poster(surah, ayah, arabic, english, surah_name, surah_name_arabic, e
         draw.font_weight = 500
         draw.fill_color = Color("#FFFFFF")
 
-        arabic_lines = wrap_text(draw, arabic, arabic_font, arabic_font_size, max_width=900)
+        arabic_lines = wrap_text(draw, arabic, arabic_font, arabic_font_size, max_width=scaled(900))
 
         # ===== ENGLISH TEXT =====
         draw.font = english_font
         draw.font_size = english_font_size
         draw.fill_color = Color("#FFFFFF")
 
-        english_lines = wrap_text(draw, english, english_font, english_font_size, max_width=900)
+        english_lines = wrap_text(draw, english, english_font, english_font_size, max_width=scaled(900))
 
         # ===== CALCULATE TOTAL HEIGHT FOR CENTERING =====
-        arabic_line_spacing = 25
-        english_line_spacing = 10
+        arabic_line_spacing = scaled(25)
+        english_line_spacing = scaled(10)
 
         total_height = (
             len(arabic_lines) * (arabic_font_size + arabic_line_spacing) +
@@ -331,21 +347,21 @@ def create_poster(surah, ayah, arabic, english, surah_name, surah_name_arabic, e
         # ===== ADDITIONAL INFO (EXACT FROM PRODUCTION) =====
         comp_date = f"Read 1 Ayah with us daily"
         draw.font = english_font
-        draw.font_size = 30
+        draw.font_size = scaled(30)
         draw.fill_color = Color("#FFFFFF")
         
         comp_date_width = draw.get_font_metrics(img, comp_date, True).text_width
         comp_date_x_position = (poster_width // 2) - (comp_date_width // 2)
-        draw.text(int(comp_date_x_position), 1790, comp_date)
+        draw.text(int(comp_date_x_position), scaled(1650), comp_date)
 
         comp_date = f"(Follow us and save this reel for daily Quran in your feed)"
         draw.font = english_font_small
-        draw.font_size = 30
+        draw.font_size = scaled(30)
         draw.fill_color = Color("#FFFFFF")
         
         comp_date_width = draw.get_font_metrics(img, comp_date, True).text_width
         comp_date_x_position = (poster_width // 2) - (comp_date_width // 2)
-        draw.text(int(comp_date_x_position), 1820, comp_date)
+        draw.text(int(comp_date_x_position), scaled(1680), comp_date)
 
         # ===== APPLY TEXT TO IMAGE =====
         draw(img)
@@ -355,12 +371,11 @@ def create_poster(surah, ayah, arabic, english, surah_name, surah_name_arabic, e
         img.save(filename=output_path)
         img.close()
 
-        # ===== CONVERT TO PIL & RESIZE (EXACT FROM PRODUCTION) =====
-        img_pil = PILImage.open(output_path).convert("RGB")
-        img_pil = img_pil.resize((1080, 1920), PILImage.LANCZOS)
-        
-        # ===== SAVE FIXED IMAGE WITH QUALITY =====
-        img_pil.save(output_path, format="PNG", quality=100, dpi=(300, 300))
+        # Supersample the poster for sharper text edges in the final 1080x1920 output.
+        with PILImage.open(output_path) as poster_img:
+            img_pil = poster_img.convert("RGB")
+            img_pil = img_pil.resize((VIDEO_WIDTH, VIDEO_HEIGHT), PILImage.LANCZOS)
+            img_pil.save(output_path, format="PNG", compress_level=0)
 
         log(f"✓ Poster created: {output_path}")
         return output_path
@@ -430,15 +445,25 @@ def create_quran_video(image_path, audio_path, video_output):
         final_clip = img_clip.set_audio(audio_clip)
 
         # EXACT ffmpeg_params from production
-        log(f"Encoding with 8000k bitrate, CRF=17, preset=slower...")
+        log(f"Encoding at {VIDEO_WIDTH}x{VIDEO_HEIGHT}, bitrate {VIDEO_BITRATE}, CRF={VIDEO_CRF}, preset={VIDEO_PRESET}...")
         final_clip.write_videofile(
             video_output,
             fps=VIDEO_FPS,
             codec="libx264",
-            preset="slower",
+            preset=VIDEO_PRESET,
             threads=4,
-            bitrate="8000k",
-            ffmpeg_params=["-crf", "17", "-b:v", "12000k", "-maxrate", "14000k", "-bufsize", "16000k"],
+            bitrate=VIDEO_BITRATE,
+            audio_codec="aac",
+            audio_bitrate=AUDIO_BITRATE,
+            ffmpeg_params=[
+                "-crf", VIDEO_CRF,
+                "-maxrate", VIDEO_MAXRATE,
+                "-bufsize", VIDEO_BUFSIZE,
+                "-pix_fmt", "yuv420p",
+                "-movflags", "+faststart",
+                "-profile:v", "high",
+                "-level", "4.2",
+            ],
             verbose=False,
             logger=None,
         )
@@ -448,7 +473,7 @@ def create_quran_video(image_path, audio_path, video_output):
 
         file_size_mb = os.path.getsize(video_output) / (1024 * 1024)
         log(f"✓ Video created: {video_output}")
-        log(f"  Size: {file_size_mb:.2f} MB | Quality: 8000k @ CRF=17")
+        log(f"  Size: {file_size_mb:.2f} MB | Quality: {VIDEO_BITRATE} @ CRF={VIDEO_CRF}")
         return True
 
     except Exception as e:
@@ -459,7 +484,7 @@ def create_quran_video(image_path, audio_path, video_output):
 def merge_videos(video_files, output_video, first_video_path, last_video_path):
     """EXACT from production - merges with first.mp4 and last.mp4"""
     try:
-        list_file = "video_list_merge.txt"
+        list_file = Path(output_video).with_name("video_list_merge.txt")
 
         with open(list_file, "w") as f:
             # Fix and add first video (bismillah)
@@ -481,11 +506,19 @@ def merge_videos(video_files, output_video, first_video_path, last_video_path):
 
         if video_files:
             ffmpeg_cmd = [
-                "ffmpeg", "-f", "concat", "-safe", "0", "-i", list_file,
+                "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(list_file),
                 "-c:v", "libx264", "-pix_fmt", "yuv420p",
-                "-vf", "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
-                "-crf", "17", "-preset", "slower", "-b:v", "8000k", "-maxrate", "10000k", "-bufsize", "12000k",
-                "-c:a", "aac", "-b:a", "256k",
+                "-vf", f"scale={VIDEO_WIDTH}:{VIDEO_HEIGHT}:force_original_aspect_ratio=decrease,pad={VIDEO_WIDTH}:{VIDEO_HEIGHT}:(ow-iw)/2:(oh-ih)/2",
+                "-r", str(VIDEO_FPS),
+                "-crf", VIDEO_CRF,
+                "-preset", VIDEO_PRESET,
+                "-b:v", VIDEO_BITRATE,
+                "-maxrate", VIDEO_MAXRATE,
+                "-bufsize", VIDEO_BUFSIZE,
+                "-profile:v", "high",
+                "-level", "4.2",
+                "-movflags", "+faststart",
+                "-c:a", "aac", "-b:a", AUDIO_BITRATE,
                 output_video
             ]
 

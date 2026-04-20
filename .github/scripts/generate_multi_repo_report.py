@@ -518,59 +518,78 @@ def markdown_to_html(md: str):
                 white-space: nowrap;
                 text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
             }}
-            /* Instagram header (cols 3-5) */
-            th:nth-child(3), th:nth-child(4), th:nth-child(5) {{
+            /* Instagram header (cols 2-4) */
+            th:nth-child(2), th:nth-child(3), th:nth-child(4) {{
                 background: linear-gradient(135deg, #DA88B3 0%, #C8739E 100%);
                 border-right: 1px solid rgba(218, 136, 179, 0.3);
             }}
-            /* Facebook header (cols 6-8) */
-            th:nth-child(6), th:nth-child(7), th:nth-child(8) {{
+
+            /* Facebook header (cols 5-7) */
+            th:nth-child(5), th:nth-child(6), th:nth-child(7) {{
                 background: linear-gradient(135deg, #6BA3E5 0%, #5A8FD1 100%);
                 border-right: 1px solid rgba(107, 163, 229, 0.3);
             }}
-            /* YouTube header (cols 9-11) */
-            th:nth-child(9), th:nth-child(10), th:nth-child(11) {{
+
+            /* YouTube header (cols 8-10) */
+            th:nth-child(8), th:nth-child(9), th:nth-child(10) {{
                 background: linear-gradient(135deg, #FF7F7F 0%, #E85555 100%);
                 border-right: 1px solid rgba(255, 127, 127, 0.3);
             }}
-            /* Run # and Workflow headers */
-            th:nth-child(1), th:nth-child(2) {{
+
+            /* Run # header (col 1 only) */
+            th:nth-child(1) {{
                 background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
                 border-right: 2px solid rgba(255,255,255,0.2);
             }}
-            /* Link header */
-            th:nth-child(12) {{
+
+            /* Link header (col 11) */
+            th:nth-child(11) {{
                 background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
                 border-left: 2px solid rgba(255,255,255,0.2);
             }}
+
             td {{
                 padding: clamp(8px, 2vw, 12px);
                 border-bottom: 1px solid #334155;
             }}
-            /* Instagram cells (cols 3-5) */
-            td:nth-child(3), td:nth-child(4), td:nth-child(5) {{
+
+            /* Instagram cells (cols 2-4) */
+            td:nth-child(2), td:nth-child(3), td:nth-child(4) {{
                 background: rgba(218, 136, 179, 0.06);
                 border-right: 1px solid rgba(218, 136, 179, 0.15);
             }}
-            /* Facebook cells (cols 6-8) */
-            td:nth-child(6), td:nth-child(7), td:nth-child(8) {{
+
+            /* Facebook cells (cols 5-7) */
+            td:nth-child(5), td:nth-child(6), td:nth-child(7) {{
                 background: rgba(107, 163, 229, 0.06);
                 border-right: 1px solid rgba(107, 163, 229, 0.15);
             }}
-            /* YouTube cells (cols 9-11) */
-            td:nth-child(9), td:nth-child(10), td:nth-child(11) {{
+
+            /* YouTube cells (cols 8-10) */
+            td:nth-child(8), td:nth-child(9), td:nth-child(10) {{
                 background: rgba(255, 127, 127, 0.06);
                 border-right: 1px solid rgba(255, 127, 127, 0.15);
             }}
-            tr:hover td:nth-child(3), tr:hover td:nth-child(4), tr:hover td:nth-child(5) {{
+
+            /* Hover effects */
+            tr:hover td:nth-child(2),
+            tr:hover td:nth-child(3),
+            tr:hover td:nth-child(4) {{
                 background: rgba(218, 136, 179, 0.12);
             }}
-            tr:hover td:nth-child(6), tr:hover td:nth-child(7), tr:hover td:nth-child(8) {{
+
+            tr:hover td:nth-child(5),
+            tr:hover td:nth-child(6),
+            tr:hover td:nth-child(7) {{
                 background: rgba(107, 163, 229, 0.12);
             }}
-            tr:hover td:nth-child(9), tr:hover td:nth-child(10), tr:hover td:nth-child(11) {{
+
+            tr:hover td:nth-child(8),
+            tr:hover td:nth-child(9),
+            tr:hover td:nth-child(10) {{
                 background: rgba(255, 127, 127, 0.12);
             }}
+
             tr:last-child td {{
                 border-bottom: none;
             }}
