@@ -4,6 +4,7 @@ import os
 import re
 import zipfile
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Dict, List
 from zoneinfo import ZoneInfo
 
@@ -13,6 +14,7 @@ import requests
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 EVENT_PREFIX = "UPLOAD_EVENT "
 IST = ZoneInfo("Asia/Kolkata")
+MQQ_POST_LOG = Path(__file__).parent / "mqq_post_log.json"
 
 REPOS = [
     "iwilllearnquran/learnqurandaily",
@@ -440,11 +442,96 @@ def generate_repo_report(repo: str) -> str:
     return report
 
 
+def _mqq_status_cell(platform: dict) -> str:
+    status = (platform.get("status") or "unknown").lower()
+    label = {"success": "SUCCESS", "failed": "FAILED", "skipped": "SKIPPED"}.get(status, "UNKNOWN")
+    return f'<span class="{status}">{label}</span>'
+
+
+def _mqq_link_cell(platform: dict, label: str) -> str:
+    url = platform.get("url")
+    if url:
+        return f"[{label}]({url})"
+    return "-"
+
+
+def _mqq_token_cell(platform: dict) -> str:
+    status = platform.get("token_status", "unknown")
+    expires = platform.get("token_expires_at")
+    if expires:
+        try:
+            dt = datetime.fromisoformat(expires.replace("Z", "+00:00"))
+            exp_label = dt.astimezone(IST).strftime("%d/%m/%y %H:%M")
+            now = datetime.now(UTC)
+            expired = dt < now
+            tag = "failed" if expired else "success"
+            exp_str = f"exp: {exp_label}"
+        except Exception:
+            tag = "unknown"
+            exp_str = f"exp: {expires[:10]}"
+        return f'<span class="{tag}">{status} ({exp_str})</span>'
+    tag = "success" if status == "valid" else ("failed" if status == "invalid" else "unknown")
+    return f'<span class="{tag}">{status}</span>'
+
+
+def generate_mqq_reel_report() -> str:
+    if not MQQ_POST_LOG.exists():
+        return "\n## My Quran Quest (Word Reels)\n\nNo post log found. Run autopost_sample_reels.py first.\n"
+
+    try:
+        entries: List[Dict] = json.loads(MQQ_POST_LOG.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return f"\n## My Quran Quest (Word Reels)\n\nFailed to read post log: {exc}\n"
+
+    if not entries:
+        return "\n## My Quran Quest (Word Reels)\n\nPost log is empty.\n"
+
+    recent = list(reversed(entries[-20:]))
+
+    report = "\n## My Quran Quest (Word Reels)\n\n"
+    report += "| Date | Rank | Word | IG | FB | YT | IG Link | FB Link | YT Link | YT Token |\n"
+    report += "|------|-----:|------|----|----|----|---------|---------|---------|-----------|\n"
+
+    for entry in recent:
+        date = entry.get("date", "?")
+        rank = entry.get("rank", "?")
+        arabic = entry.get("arabic", "")
+        translit = entry.get("transliteration", "")
+        meaning = entry.get("meaning", "")
+        word_cell = f"{arabic} ({translit}) = {meaning}" if translit else f"{arabic} = {meaning}"
+
+        ig = entry.get("instagram") or {}
+        fb = entry.get("facebook") or {}
+        yt = entry.get("youtube") or {}
+
+        report += (
+            f"| {date} | {rank} | {word_cell} | "
+            f"{_mqq_status_cell(ig)} | {_mqq_status_cell(fb)} | {_mqq_status_cell(yt)} | "
+            f"{_mqq_link_cell(ig, 'IG')} | {_mqq_link_cell(fb, 'FB')} | {_mqq_link_cell(yt, 'YT')} | "
+            f"{_mqq_token_cell(yt)} |\n"
+        )
+
+    # Token status summary
+    last = entries[-1]
+    ig_last = last.get("instagram") or {}
+    fb_last = last.get("facebook") or {}
+    yt_last = last.get("youtube") or {}
+
+    report += "\n### Token Status (last post)\n\n"
+    report += f"**INSTAGRAM:** {_mqq_token_cell({'token_status': ig_last.get('token_status', 'unknown')})}\n\n"
+    report += f"**FACEBOOK:** {_mqq_token_cell({'token_status': fb_last.get('token_status', 'unknown')})}\n\n"
+    report += f"**YOUTUBE:** {_mqq_token_cell(yt_last)}\n"
+
+    return report
+
+
 def generate_full_report():
     report = f"Generated: {now_utc().strftime('%Y-%m-%d %H:%M UTC')}\n\n"
 
     for repo in REPOS:
         report += generate_repo_report(repo)
+
+    report += generate_mqq_reel_report()
 
     return report
 
