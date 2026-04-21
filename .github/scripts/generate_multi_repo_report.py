@@ -22,6 +22,8 @@ REPOS = [
     "iwilllearnenglishquran/learnenglishqurandaily",
 ]
 
+MQQ_REPO = "myquranquest-gh/MQQ-Autopost"
+
 if not GITHUB_TOKEN:
     raise ValueError("GITHUB_TOKEN is not set")
 
@@ -456,17 +458,42 @@ def _mqq_token_cell(platform: dict) -> str:
     return f'<span class="badge {tag}">{status}</span>'
 
 
-def generate_mqq_reel_html() -> str:
-    if not MQQ_POST_LOG.exists():
-        return '<div class="repo-section"><h2>My Quran Quest (Word Reels)</h2><p class="no-data">No post log found.</p></div>'
+def fetch_mqq_entries(hours: int = 168) -> List[Dict]:
+    """Pull MQQ UPLOAD_EVENT entries from the MQQ-Autopost repo's recent workflow logs."""
+    runs = get_workflow_runs(MQQ_REPO, hours=hours)
+    entries: List[Dict] = []
+    seen = set()
+    for run in runs:
+        run_id = run.get("id")
+        if not run_id:
+            continue
+        jobs = get_jobs_for_run(MQQ_REPO, run_id)
+        for job in jobs:
+            job_id = job.get("id")
+            if not job_id:
+                continue
+            logs = get_job_logs(MQQ_REPO, job_id)
+            for event in parse_upload_events(logs):
+                key = (event.get("date"), event.get("rank"), event.get("arabic"))
+                if key in seen:
+                    continue
+                seen.add(key)
+                entries.append(event)
+    entries.sort(key=lambda e: str(e.get("posted_at_utc") or ""))
+    return entries
 
-    try:
-        entries: List[Dict] = json.loads(MQQ_POST_LOG.read_text(encoding="utf-8"))
-    except Exception as exc:
-        return f'<div class="repo-section"><h2>My Quran Quest (Word Reels)</h2><p class="no-data">Failed to read post log: {exc}</p></div>'
+
+def generate_mqq_reel_html() -> str:
+    entries: List[Dict] = fetch_mqq_entries()
+
+    if not entries and MQQ_POST_LOG.exists():
+        try:
+            entries = json.loads(MQQ_POST_LOG.read_text(encoding="utf-8"))
+        except Exception as exc:
+            return f'<div class="repo-section"><h2>My Quran Quest (Word Reels)</h2><p class="no-data">Failed to read post log: {exc}</p></div>'
 
     if not entries:
-        return '<div class="repo-section"><h2>My Quran Quest (Word Reels)</h2><p class="no-data">Post log is empty.</p></div>'
+        return '<div class="repo-section"><h2>My Quran Quest (Word Reels)</h2><p class="no-data">No recent posts.</p></div>'
 
     recent = list(reversed(entries[-20:]))
 
