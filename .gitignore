@@ -6,3 +6,6 @@ __pycache__/
 .vscode/
 .DS_Store
 venv/
+
+sample_videos/
+secrets/
