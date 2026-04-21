@@ -303,10 +303,10 @@ def _status_class(status: str | None) -> str:
     return (status or "unknown").lower()
 
 
-def _link_icon(url: str | None, platform: str) -> str:
-    if not url:
-        return "-"
-    return f'<a href="{url}" target="_blank" rel="noopener" class="post-link" title="View on {platform}">&#x1F517;</a>'
+def _ayah_cell(ayah_key: str, url: str | None) -> str:
+    if url and ayah_key != "?":
+        return f'<a href="{url}" target="_blank" rel="noopener" class="ayah-link">{ayah_key}</a>'
+    return ayah_key
 
 
 def generate_repo_html(repo: str, section_id: str) -> str:
@@ -366,18 +366,15 @@ def generate_repo_html(repo: str, section_id: str) -> str:
         hidden = ' style="display:none"' if idx >= 3 else ""
         rows_html += f'''<tr class="data-row" data-filter="{row_filter}" data-idx="{idx}"{hidden}>
 <td class="run-num">#{run_number}</td>
-<td class="ayah">{ig["ayah_key"]}</td>
+<td class="ayah">{_ayah_cell(ig["ayah_key"], ig_url)}</td>
 <td><span class="badge {ig_status}">{ig_status.upper()}</span></td>
 <td class="date">{ig_date}</td>
-<td class="link-cell">{_link_icon(ig_url, "Instagram")}</td>
-<td class="ayah">{fb["ayah_key"]}</td>
+<td class="ayah">{_ayah_cell(fb["ayah_key"], fb_url)}</td>
 <td><span class="badge {fb_status}">{fb_status.upper()}</span></td>
 <td class="date">{fb_date}</td>
-<td class="link-cell">{_link_icon(fb_url, "Facebook")}</td>
-<td class="ayah">{yt["ayah_key"]}</td>
+<td class="ayah">{_ayah_cell(yt["ayah_key"], yt_url)}</td>
 <td><span class="badge {yt_status}">{yt_status.upper()}</span></td>
 <td class="date">{yt_date}</td>
-<td class="link-cell">{_link_icon(yt_url, "YouTube")}</td>
 <td class="link-cell"><a href="{link}" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 '''
@@ -406,15 +403,15 @@ Show more ({total_runs - 3} more runs)
 <thead>
 <tr>
     <th class="col-run" rowspan="2">Run</th>
-    <th class="col-ig" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="ig{section_id}" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="url(#ig{section_id})" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="url(#ig{section_id})" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#ig{section_id})"/></svg> Instagram</th>
-    <th class="col-fb" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.875v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg> Facebook</th>
-    <th class="col-yt" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/><path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/></svg> YouTube</th>
+    <th class="col-ig" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="ig{section_id}" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="url(#ig{section_id})" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="url(#ig{section_id})" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#ig{section_id})"/></svg><span class="platform-name"> Instagram</span></th>
+    <th class="col-fb" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.875v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg><span class="platform-name"> Facebook</span></th>
+    <th class="col-yt" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/><path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/></svg><span class="platform-name"> YouTube</span></th>
     <th class="col-actions" rowspan="2">Run</th>
 </tr>
 <tr>
-    <th class="col-ig sub">Ayah</th><th class="col-ig sub">Status</th><th class="col-ig sub">Date</th><th class="col-ig sub">Link</th>
-    <th class="col-fb sub">Ayah</th><th class="col-fb sub">Status</th><th class="col-fb sub">Date</th><th class="col-fb sub">Link</th>
-    <th class="col-yt sub">Ayah</th><th class="col-yt sub">Status</th><th class="col-yt sub">Date</th><th class="col-yt sub">Link</th>
+    <th class="col-ig sub">Ayah</th><th class="col-ig sub">Status</th><th class="col-ig sub">Date</th>
+    <th class="col-fb sub">Ayah</th><th class="col-fb sub">Status</th><th class="col-fb sub">Date</th>
+    <th class="col-yt sub">Ayah</th><th class="col-yt sub">Status</th><th class="col-yt sub">Date</th>
 </tr>
 </thead>
 <tbody>
@@ -673,14 +670,14 @@ def generate_html_report():
         td {{ padding: 10px 8px; border-bottom: 1px solid rgba(51,65,85,0.4); }}
         tr:last-child td {{ border-bottom: none; }}
 
-        /* Subtle platform row tints */
-        td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5) {{
+        /* Subtle platform row tints - 3 cols per platform: Ayah, Status, Date */
+        td:nth-child(2), td:nth-child(3), td:nth-child(4) {{
             background: rgba(214,36,159,0.04);
         }}
-        td:nth-child(6), td:nth-child(7), td:nth-child(8), td:nth-child(9) {{
+        td:nth-child(5), td:nth-child(6), td:nth-child(7) {{
             background: rgba(24,119,242,0.04);
         }}
-        td:nth-child(10), td:nth-child(11), td:nth-child(12), td:nth-child(13) {{
+        td:nth-child(8), td:nth-child(9), td:nth-child(10) {{
             background: rgba(255,0,0,0.04);
         }}
         tr:hover td {{ background: rgba(51,65,85,0.25) !important; }}
@@ -708,7 +705,13 @@ def generate_html_report():
         /* Links */
         a {{ color: #60a5fa; text-decoration: none; transition: color 0.15s; }}
         a:hover {{ color: #93c5fd; }}
-        .post-link {{ font-size: 1.1em; }}
+        .ayah-link {{
+            color: #93c5fd;
+            font-weight: 700;
+            border-bottom: 1px dashed rgba(147,197,253,0.4);
+            padding-bottom: 1px;
+        }}
+        .ayah-link:hover {{ color: #bfdbfe; border-bottom-color: rgba(191,219,254,0.6); }}
         .run-link {{
             padding: 3px 10px;
             border-radius: 4px;
@@ -717,6 +720,7 @@ def generate_html_report():
             font-weight: 500;
         }}
         .run-link:hover {{ background: rgba(59,130,246,0.25); }}
+        .platform-name {{ }}
 
         /* Show more */
         .show-more-wrap {{ padding: 12px 20px; text-align: center; border-top: 1px solid rgba(51,65,85,0.3); }}
@@ -746,12 +750,14 @@ def generate_html_report():
             td, th {{ padding: 6px 4px; }}
             .badge {{ padding: 2px 5px; font-size: 0.7em; }}
             .show-more-wrap {{ padding: 8px 12px; }}
+            .platform-name {{ display: none; }}
         }}
         @media (max-width: 480px) {{
             body {{ padding: 6px; }}
             table {{ font-size: 0.6em; }}
             td, th {{ padding: 4px 3px; }}
             .badge {{ padding: 1px 3px; font-size: 0.65em; }}
+            .platform-name {{ display: none; }}
         }}
     </style>
 </head>
