@@ -134,14 +134,14 @@
         td { padding: 10px 8px; border-bottom: 1px solid rgba(51,65,85,0.4); }
         tr:last-child td { border-bottom: none; }
 
-        /* Subtle platform row tints */
-        td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5) {
+        /* Subtle platform row tints - 3 cols per platform: Ayah, Status, Date */
+        td:nth-child(2), td:nth-child(3), td:nth-child(4) {
             background: rgba(214,36,159,0.04);
         }
-        td:nth-child(6), td:nth-child(7), td:nth-child(8), td:nth-child(9) {
+        td:nth-child(5), td:nth-child(6), td:nth-child(7) {
             background: rgba(24,119,242,0.04);
         }
-        td:nth-child(10), td:nth-child(11), td:nth-child(12), td:nth-child(13) {
+        td:nth-child(8), td:nth-child(9), td:nth-child(10) {
             background: rgba(255,0,0,0.04);
         }
         tr:hover td { background: rgba(51,65,85,0.25) !important; }
@@ -169,7 +169,13 @@
         /* Links */
         a { color: #60a5fa; text-decoration: none; transition: color 0.15s; }
         a:hover { color: #93c5fd; }
-        .post-link { font-size: 1.1em; }
+        .ayah-link {
+            color: #93c5fd;
+            font-weight: 700;
+            border-bottom: 1px dashed rgba(147,197,253,0.4);
+            padding-bottom: 1px;
+        }
+        .ayah-link:hover { color: #bfdbfe; border-bottom-color: rgba(191,219,254,0.6); }
         .run-link {
             padding: 3px 10px;
             border-radius: 4px;
@@ -178,6 +184,7 @@
             font-weight: 500;
         }
         .run-link:hover { background: rgba(59,130,246,0.25); }
+        .platform-name { }
 
         /* Show more */
         .show-more-wrap { padding: 12px 20px; text-align: center; border-top: 1px solid rgba(51,65,85,0.3); }
@@ -207,12 +214,14 @@
             td, th { padding: 6px 4px; }
             .badge { padding: 2px 5px; font-size: 0.7em; }
             .show-more-wrap { padding: 8px 12px; }
+            .platform-name { display: none; }
         }
         @media (max-width: 480px) {
             body { padding: 6px; }
             table { font-size: 0.6em; }
             td, th { padding: 4px 3px; }
             .badge { padding: 1px 3px; font-size: 0.65em; }
+            .platform-name { display: none; }
         }
     </style>
 </head>
@@ -221,7 +230,7 @@
     <div class="header">
         <h1>Daily Upload Report</h1>
         <div class="subtitle">Quran Upload Automation Status</div>
-        <div class="generated">Generated: 2026-04-21 09:15 UTC</div>
+        <div class="generated">Generated: 2026-04-21 09:36 UTC</div>
     </div>
     <div class="repo-section" id="repo-0">
 <h2>
@@ -238,32 +247,29 @@
 <thead>
 <tr>
     <th class="col-run" rowspan="2">Run</th>
-    <th class="col-ig" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="igrepo-0" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="url(#igrepo-0)" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="url(#igrepo-0)" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#igrepo-0)"/></svg> Instagram</th>
-    <th class="col-fb" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.875v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg> Facebook</th>
-    <th class="col-yt" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/><path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/></svg> YouTube</th>
+    <th class="col-ig" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="igrepo-0" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="url(#igrepo-0)" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="url(#igrepo-0)" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#igrepo-0)"/></svg><span class="platform-name"> Instagram</span></th>
+    <th class="col-fb" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.875v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg><span class="platform-name"> Facebook</span></th>
+    <th class="col-yt" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/><path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/></svg><span class="platform-name"> YouTube</span></th>
     <th class="col-actions" rowspan="2">Run</th>
 </tr>
 <tr>
-    <th class="col-ig sub">Ayah</th><th class="col-ig sub">Status</th><th class="col-ig sub">Date</th><th class="col-ig sub">Link</th>
-    <th class="col-fb sub">Ayah</th><th class="col-fb sub">Status</th><th class="col-fb sub">Date</th><th class="col-fb sub">Link</th>
-    <th class="col-yt sub">Ayah</th><th class="col-yt sub">Status</th><th class="col-yt sub">Date</th><th class="col-yt sub">Link</th>
+    <th class="col-ig sub">Ayah</th><th class="col-ig sub">Status</th><th class="col-ig sub">Date</th>
+    <th class="col-fb sub">Ayah</th><th class="col-fb sub">Status</th><th class="col-fb sub">Date</th>
+    <th class="col-yt sub">Ayah</th><th class="col-yt sub">Status</th><th class="col-yt sub">Date</th>
 </tr>
 </thead>
 <tbody>
-<tr class="data-row" data-filter="other" data-idx="0">
+<tr class="data-row" data-filter="success" data-idx="0">
 <td class="run-num">#1069</td>
-<td class="ayah">?</td>
-<td><span class="badge unknown">UNKNOWN</span></td>
-<td class="date">?</td>
-<td class="link-cell">-</td>
-<td class="ayah">?</td>
-<td><span class="badge unknown">UNKNOWN</span></td>
-<td class="date">?</td>
-<td class="link-cell">-</td>
-<td class="ayah">?</td>
-<td><span class="badge unknown">UNKNOWN</span></td>
-<td class="date">?</td>
-<td class="link-cell">-</td>
+<td class="ayah">11:63</td>
+<td><span class="badge success">SUCCESS</span></td>
+<td class="date">21/04 02:45 PM</td>
+<td class="ayah">2:41</td>
+<td><span class="badge success">SUCCESS</span></td>
+<td class="date">21/04 02:48 PM</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=CHuW_jJw6aY" target="_blank" rel="noopener" class="ayah-link">2:41</a></td>
+<td><span class="badge success">SUCCESS</span></td>
+<td class="date">21/04 02:48 PM</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24714059302" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="success" data-idx="1">
@@ -271,15 +277,12 @@
 <td class="ayah">11:62</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 04:46 AM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:40</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 04:49 AM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:40</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=u_7C7fmGlwQ" target="_blank" rel="noopener" class="ayah-link">2:40</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 04:48 AM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=u_7C7fmGlwQ" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24695004762" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="success" data-idx="2">
@@ -287,15 +290,12 @@
 <td class="ayah">11:61</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 09:25 PM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:39</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 09:28 PM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:39</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=eyXaIlv3Eiw" target="_blank" rel="noopener" class="ayah-link">2:39</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 09:28 PM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=eyXaIlv3Eiw" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24676165618" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="success" data-idx="3" style="display:none">
@@ -303,15 +303,12 @@
 <td class="ayah">2:38</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 03:03 PM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:38</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 03:05 PM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:38</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=cWnR4HYKVPU" target="_blank" rel="noopener" class="ayah-link">2:38</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 03:05 PM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=cWnR4HYKVPU" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24658859071" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="success" data-idx="4" style="display:none">
@@ -319,15 +316,12 @@
 <td class="ayah">2:37</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 04:39 AM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:37</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 04:41 AM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:37</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=aRGJCz0XQHw" target="_blank" rel="noopener" class="ayah-link">2:37</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 04:41 AM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=aRGJCz0XQHw" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24641300621" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="success" data-idx="5" style="display:none">
@@ -335,15 +329,12 @@
 <td class="ayah">11:64</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">19/04 08:37 PM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:40</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">19/04 08:40 PM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:40</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=knn79gELXG4" target="_blank" rel="noopener" class="ayah-link">2:40</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">19/04 08:40 PM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=knn79gELXG4" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnquran/learnqurandaily/actions/runs/24632037360" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 
@@ -371,32 +362,29 @@ Show more (3 more runs)
 <thead>
 <tr>
     <th class="col-run" rowspan="2">Run</th>
-    <th class="col-ig" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="igrepo-1" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="url(#igrepo-1)" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="url(#igrepo-1)" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#igrepo-1)"/></svg> Instagram</th>
-    <th class="col-fb" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.875v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg> Facebook</th>
-    <th class="col-yt" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/><path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/></svg> YouTube</th>
+    <th class="col-ig" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="igrepo-1" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="url(#igrepo-1)" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="url(#igrepo-1)" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#igrepo-1)"/></svg><span class="platform-name"> Instagram</span></th>
+    <th class="col-fb" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.875v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg><span class="platform-name"> Facebook</span></th>
+    <th class="col-yt" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/><path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/></svg><span class="platform-name"> YouTube</span></th>
     <th class="col-actions" rowspan="2">Run</th>
 </tr>
 <tr>
-    <th class="col-ig sub">Ayah</th><th class="col-ig sub">Status</th><th class="col-ig sub">Date</th><th class="col-ig sub">Link</th>
-    <th class="col-fb sub">Ayah</th><th class="col-fb sub">Status</th><th class="col-fb sub">Date</th><th class="col-fb sub">Link</th>
-    <th class="col-yt sub">Ayah</th><th class="col-yt sub">Status</th><th class="col-yt sub">Date</th><th class="col-yt sub">Link</th>
+    <th class="col-ig sub">Ayah</th><th class="col-ig sub">Status</th><th class="col-ig sub">Date</th>
+    <th class="col-fb sub">Ayah</th><th class="col-fb sub">Status</th><th class="col-fb sub">Date</th>
+    <th class="col-yt sub">Ayah</th><th class="col-yt sub">Status</th><th class="col-yt sub">Date</th>
 </tr>
 </thead>
 <tbody>
 <tr class="data-row" data-filter="success" data-idx="0">
 <td class="run-num">#1173</td>
-<td class="ayah">15:28</td>
+<td class="ayah"><a href="https://www.instagram.com/reel/DXYqWtVDtmp/" target="_blank" rel="noopener" class="ayah-link">15:28</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 12:59 PM</td>
-<td class="link-cell"><a href="https://www.instagram.com/reel/DXYqWtVDtmp/" target="_blank" rel="noopener" class="post-link" title="View on Instagram">&#x1F517;</a></td>
-<td class="ayah">2:23</td>
+<td class="ayah"><a href="https://www.facebook.com/***/videos/1500011251508210" target="_blank" rel="noopener" class="ayah-link">2:23</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 01:01 PM</td>
-<td class="link-cell"><a href="https://www.facebook.com/***/videos/1500011251508210" target="_blank" rel="noopener" class="post-link" title="View on Facebook">&#x1F517;</a></td>
-<td class="ayah">2:23</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=lj48a3whLak" target="_blank" rel="noopener" class="ayah-link">2:23</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 01:01 PM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=lj48a3whLak" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24709630742" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="success" data-idx="1">
@@ -404,15 +392,12 @@ Show more (3 more runs)
 <td class="ayah">15:28</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 12:40 PM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:23</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 12:42 PM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:23</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=hpsAP0kwOVg" target="_blank" rel="noopener" class="ayah-link">2:23</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 12:42 PM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=hpsAP0kwOVg" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24708974584" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="other" data-idx="2">
@@ -420,15 +405,12 @@ Show more (3 more runs)
 <td class="ayah">15:30</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">15:30</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">15:30</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24694958395" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="other" data-idx="3" style="display:none">
@@ -436,15 +418,12 @@ Show more (3 more runs)
 <td class="ayah">15:29</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">15:29</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">15:29</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24678434656" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="other" data-idx="4" style="display:none">
@@ -452,15 +431,12 @@ Show more (3 more runs)
 <td class="ayah">15:28</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">15:28</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">15:28</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24664884786" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="success" data-idx="5" style="display:none">
@@ -468,15 +444,12 @@ Show more (3 more runs)
 <td class="ayah">15:27</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 04:36 AM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:22</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 04:38 AM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:22</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=dfj2Ayo_LC8" target="_blank" rel="noopener" class="ayah-link">2:22</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">20/04 04:38 AM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=dfj2Ayo_LC8" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24641276132" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="success" data-idx="6" style="display:none">
@@ -484,15 +457,12 @@ Show more (3 more runs)
 <td class="ayah">15:26</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">19/04 09:31 PM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:21</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">19/04 09:32 PM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:21</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=klfiwOK4Zrc" target="_blank" rel="noopener" class="ayah-link">2:21</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">19/04 09:32 PM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=klfiwOK4Zrc" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24633130842" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="success" data-idx="7" style="display:none">
@@ -500,15 +470,12 @@ Show more (3 more runs)
 <td class="ayah">15:25</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">19/04 04:40 PM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:20</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">19/04 04:43 PM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:20</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=ZZWouvm8Ifw" target="_blank" rel="noopener" class="ayah-link">2:20</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">19/04 04:43 PM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=ZZWouvm8Ifw" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnuduquran/learnurduqurandaily/actions/runs/24627624049" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 
@@ -536,15 +503,15 @@ Show more (5 more runs)
 <thead>
 <tr>
     <th class="col-run" rowspan="2">Run</th>
-    <th class="col-ig" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="igrepo-2" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="url(#igrepo-2)" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="url(#igrepo-2)" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#igrepo-2)"/></svg> Instagram</th>
-    <th class="col-fb" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.875v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg> Facebook</th>
-    <th class="col-yt" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/><path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/></svg> YouTube</th>
+    <th class="col-ig" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="igrepo-2" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="url(#igrepo-2)" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="url(#igrepo-2)" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#igrepo-2)"/></svg><span class="platform-name"> Instagram</span></th>
+    <th class="col-fb" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.875v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg><span class="platform-name"> Facebook</span></th>
+    <th class="col-yt" colspan="3"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/><path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/></svg><span class="platform-name"> YouTube</span></th>
     <th class="col-actions" rowspan="2">Run</th>
 </tr>
 <tr>
-    <th class="col-ig sub">Ayah</th><th class="col-ig sub">Status</th><th class="col-ig sub">Date</th><th class="col-ig sub">Link</th>
-    <th class="col-fb sub">Ayah</th><th class="col-fb sub">Status</th><th class="col-fb sub">Date</th><th class="col-fb sub">Link</th>
-    <th class="col-yt sub">Ayah</th><th class="col-yt sub">Status</th><th class="col-yt sub">Date</th><th class="col-yt sub">Link</th>
+    <th class="col-ig sub">Ayah</th><th class="col-ig sub">Status</th><th class="col-ig sub">Date</th>
+    <th class="col-fb sub">Ayah</th><th class="col-fb sub">Status</th><th class="col-fb sub">Date</th>
+    <th class="col-yt sub">Ayah</th><th class="col-yt sub">Status</th><th class="col-yt sub">Date</th>
 </tr>
 </thead>
 <tbody>
@@ -553,15 +520,12 @@ Show more (5 more runs)
 <td class="ayah">11:24</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 04:42 AM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:23</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 04:45 AM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:23</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=lKnh8BQRRW0" target="_blank" rel="noopener" class="ayah-link">2:23</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 04:45 AM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=lKnh8BQRRW0" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24695012161" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="success" data-idx="1">
@@ -569,15 +533,12 @@ Show more (5 more runs)
 <td class="ayah">11:24</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 01:11 AM</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:23</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 01:14 AM</td>
-<td class="link-cell">-</td>
-<td class="ayah">2:23</td>
+<td class="ayah"><a href="https://www.youtube.com/watch?v=i2pbGJbLk14" target="_blank" rel="noopener" class="ayah-link">2:23</a></td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 01:13 AM</td>
-<td class="link-cell"><a href="https://www.youtube.com/watch?v=i2pbGJbLk14" target="_blank" rel="noopener" class="post-link" title="View on YouTube">&#x1F517;</a></td>
 <td class="link-cell"><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24686442871" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="failed" data-idx="2">
@@ -585,15 +546,12 @@ Show more (5 more runs)
 <td class="ayah">11:24</td>
 <td><span class="badge success">SUCCESS</span></td>
 <td class="date">21/04 12:56 AM</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">2:23</td>
 <td><span class="badge failed">FAILED</span></td>
 <td class="date">21/04 12:59 AM</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24685745555" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="other" data-idx="3" style="display:none">
@@ -601,15 +559,12 @@ Show more (5 more runs)
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24685444511" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="other" data-idx="4" style="display:none">
@@ -617,15 +572,12 @@ Show more (5 more runs)
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24685140567" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="other" data-idx="5" style="display:none">
@@ -633,15 +585,12 @@ Show more (5 more runs)
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24684007700" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="other" data-idx="6" style="display:none">
@@ -649,15 +598,12 @@ Show more (5 more runs)
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24683264661" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="other" data-idx="7" style="display:none">
@@ -665,15 +611,12 @@ Show more (5 more runs)
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24679648754" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="other" data-idx="8" style="display:none">
@@ -681,15 +624,12 @@ Show more (5 more runs)
 <td class="ayah">11:25</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:25</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:25</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24678538536" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 <tr class="data-row" data-filter="other" data-idx="9" style="display:none">
@@ -697,15 +637,12 @@ Show more (5 more runs)
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="ayah">11:24</td>
 <td><span class="badge unknown">UNKNOWN</span></td>
 <td class="date">?</td>
-<td class="link-cell">-</td>
 <td class="link-cell"><a href="https://github.com/iwilllearnenglishquran/learnenglishqurandaily/actions/runs/24664809550" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
 </tr>
 
