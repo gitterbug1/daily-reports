@@ -40,11 +40,11 @@ PLATFORM_FILE = {
 }
 
 
-# Per-language part hour windows (IST)
-PART_HOURS = {
-    "ar": (7, 14),   # Arabic: Part 2 at 7, Part 3 at 14
-    "en": (10, 15),  # English: Part 2 at 10, Part 3 at 15
-    "ur": (10, 15),  # Urdu:    Part 2 at 10, Part 3 at 15
+# Per-language part scheduled times (hour, minute) in IST
+PART_SCHEDULES = {
+    "ar": [(4, 0), (13, 0), (20, 30)],   # 4:00, 13:00, 20:30 IST
+    "en": [(4, 0), (16, 0), (21, 0)],    # 4:00, 16:00, 21:00 IST
+    "ur": [(4, 0), (16, 0), (21, 0)],    # 4:00, 16:00, 21:00 IST
 }
 
 # Ayahs per surah (1-indexed; total = 6236).
@@ -64,11 +64,12 @@ AYAH_COUNTS = [
 ]
 
 
-def current_part(now_ist: datetime, part2_hour: int, part3_hour: int) -> int:
-    if now_ist.hour < part2_hour:
-        return 1
-    if now_ist.hour < part3_hour:
-        return 2
+
+def current_part_exact(now_ist: datetime, part_times: list[tuple[int, int]]) -> int:
+    # part_times: [(h1, m1), (h2, m2), (h3, m3)]
+    for i, (h, m) in enumerate(part_times):
+        if (now_ist.hour, now_ist.minute) < (h, m):
+            return i + 1
     return 3
 
 
@@ -107,11 +108,23 @@ def update_schedule(xlsx_path: Path, start_surah: int, start_ayah: int) -> None:
             break
     if lang is None:
         lang = "ar"  # fallback default
-    part2_hour, part3_hour = PART_HOURS.get(lang, (10, 17))
-    cur_part = current_part(now, part2_hour, part3_hour)
+    part_times = PART_SCHEDULES.get(lang, [(4,0), (10,0), (17,0)])
+    cur_part = current_part_exact(now, part_times)
 
-    # Find the next run: if the current part's scheduled time has not yet elapsed, include it
-    mask_next = (df["Date"] > today) | ((df["Date"] == today) & (df["PartNum"] >= cur_part))
+    # For today's rows, check if the current time is after the scheduled time for that part
+    def is_future_row(row):
+        # row["Date"] is pd.Timestamp, today is pd.Timestamp
+        row_date = row["Date"]
+        row_part = int(str(row["Part"]).replace("Part", "").strip())
+        if row_date > today:
+            return True
+        if row_date < today:
+            return False
+        # row_date == today
+        h, m = part_times[row_part - 1]
+        return (now.hour, now.minute) < (h, m)
+
+    mask_next = df.apply(is_future_row, axis=1)
     next_idx = df.index[mask_next]
     if len(next_idx) == 0:
         print(f"  [{xlsx_path.name}] no future rows to update — schedule exhausted.")

@@ -43,15 +43,6 @@ def get_repo_display_name(repo: str) -> str:
     }.get(repo, repo)
 
 
-def get_workflow_display_name(repo: str) -> str:
-    """Get display name for workflow based on repo"""
-    return {
-        "iwilllearnquran/learnqurandaily": "Quran Verse Generator (IG + YT)",
-        "iwilllearnuduquran/learnurduqurandaily": "Urdu Quran Generator (IG + YT)",
-        "iwilllearnenglishquran/learnenglishqurandaily": "English Quran Generator (IG + YT)",
-    }.get(repo, "Quran Generator")
-
-
 def get_workflow_runs(repo: str, hours: int = 48) -> List[Dict]:
     url = f"https://api.github.com/repos/{repo}/actions/runs"
     since = (now_utc() - timedelta(hours=hours)).isoformat()
@@ -308,69 +299,27 @@ def format_status(status: str | None) -> str:
     }.get((status or "unknown").lower(), (status or "unknown").upper())
 
 
-def format_api_cell(event: Dict) -> str:
-    if not event:
-        return "UNKNOWN"
-
-    status = format_status(event.get("status"))
-    token_status = event.get("token_status")
-    token_expires_at = event.get("token_expires_at")
-    data_access_expires_at = event.get("data_access_expires_at")
-    token_expired = event.get("token_expired")
-
-    details = []
-    if token_status:
-        details.append(f"token={token_status}")
-    if token_expired is not None:
-        details.append(f"expired={'yes' if token_expired else 'no'}")
-    if token_expires_at:
-        expiry = to_ist_label(token_expires_at)
-        details.append(f"exp={expiry if expiry != '?' else token_expires_at}")
-    elif token_status:
-        details.append("exp=unknown")
-    if data_access_expires_at:
-        data_expiry = to_ist_label(data_access_expires_at)
-        details.append(f"data_exp={data_expiry if data_expiry != '?' else data_access_expires_at}")
-
-    if details:
-        return f"{status} ({', '.join(details)})"
-    return status
+def _status_class(status: str | None) -> str:
+    return (status or "unknown").lower()
 
 
-def format_post_cell(event: Dict) -> str:
-    if not event:
-        return "UNKNOWN"
-
-    status = format_status(event.get("status"))
-    posted_at = event.get("posted_at") or event.get("logged_at")
-    posted_label = to_ist_label(posted_at)
-
-    if posted_label != "?" and status == "SUCCESS":
-        return f"{status} ({posted_label})"
-    if event.get("reason"):
-        return f"{status} ({event['reason']})"
-    if event.get("error") and status == "FAILED":
-        return f"{status}"
-    return status
+def _link_icon(url: str | None, platform: str) -> str:
+    if not url:
+        return "-"
+    return f'<a href="{url}" target="_blank" rel="noopener" class="post-link" title="View on {platform}">&#x1F517;</a>'
 
 
-def generate_repo_report(repo: str) -> str:
+def generate_repo_html(repo: str, section_id: str) -> str:
     display_name = get_repo_display_name(repo)
     runs = get_workflow_runs(repo)
 
     if not runs:
-        return f"\n### {display_name}\n\nNo workflow runs.\n"
+        return f'<div class="repo-section"><h2>{display_name}</h2><p class="no-data">No workflow runs found.</p></div>'
 
-    report = f"\n## {display_name}\n\n"
-    report += '| Run # | IG Ayah | IG Post | IG Date | FB Ayah | FB Post | FB Date | YT Ayah | YT Post | YT Date | Link |\n'
-    report += "|------:|---------|---------|---------|---------|---------|---------|---------|---------|---------|------|\n"
-
-    api_summary = {"instagram": {}, "facebook": {}, "youtube": {}}
-
-    for run in runs[:10]:
+    rows_html = ""
+    for idx, run in enumerate(runs[:10]):
         run_id = run["id"]
         run_number = run["run_number"]
-        workflow_name = run.get("name", "Workflow")
 
         jobs = get_jobs_for_run(repo, run_id)
         logs_list: List[str] = []
@@ -385,73 +334,109 @@ def generate_repo_report(repo: str) -> str:
         summary = build_run_summary(events, logs_list, repo)
         link = f"https://github.com/{repo}/actions/runs/{run_id}"
 
-        # Extract post status and date for each platform
-        ig_post_event = summary['platforms']['instagram']['post_result']
-        yt_post_event = summary['platforms']['youtube']['post_result']
-        fb_post_event = summary['platforms']['facebook']['post_result']
+        ig = summary["platforms"]["instagram"]
+        fb = summary["platforms"]["facebook"]
+        yt = summary["platforms"]["youtube"]
 
-        ig_post_status = format_status(ig_post_event.get("status")) if ig_post_event else "UNKNOWN"
-        yt_post_status = format_status(yt_post_event.get("status")) if yt_post_event else "UNKNOWN"
-        fb_post_status = format_status(fb_post_event.get("status")) if fb_post_event else "UNKNOWN"
+        ig_event = ig["post_result"]
+        fb_event = fb["post_result"]
+        yt_event = yt["post_result"]
 
-        # Color code the status
-        ig_post_colored = f'<span class="{ig_post_status.lower()}">{ig_post_status}</span>'
-        yt_post_colored = f'<span class="{yt_post_status.lower()}">{yt_post_status}</span>'
-        fb_post_colored = f'<span class="{fb_post_status.lower()}">{fb_post_status}</span>'
+        ig_status = _status_class(ig_event.get("status")) if ig_event else "unknown"
+        fb_status = _status_class(fb_event.get("status")) if fb_event else "unknown"
+        yt_status = _status_class(yt_event.get("status")) if yt_event else "unknown"
 
-        ig_date = to_ist_label(ig_post_event.get("posted_at") or ig_post_event.get("logged_at")) if ig_post_event else "?"
-        yt_date = to_ist_label(yt_post_event.get("posted_at") or yt_post_event.get("logged_at")) if yt_post_event else "?"
-        fb_date = to_ist_label(fb_post_event.get("posted_at") or fb_post_event.get("logged_at")) if fb_post_event else "?"
+        ig_date = to_ist_label(ig_event.get("posted_at") or ig_event.get("logged_at")) if ig_event else "?"
+        fb_date = to_ist_label(fb_event.get("posted_at") or fb_event.get("logged_at")) if fb_event else "?"
+        yt_date = to_ist_label(yt_event.get("posted_at") or yt_event.get("logged_at")) if yt_event else "?"
 
-        # Store API info for summary
-        for platform in ["instagram", "facebook", "youtube"]:
-            api_event = summary['platforms'][platform]['api_check']
-            if api_event:
-                api_summary[platform][run_number] = api_event
+        ig_url = ig_event.get("url") if ig_event else None
+        fb_url = fb_event.get("url") if fb_event else None
+        yt_url = yt_event.get("url") if yt_event else None
 
-        report += (
-            f"| #{run_number} | "
-            f"{summary['platforms']['instagram']['ayah_key']} | "
-            f"{ig_post_colored} | {ig_date} | "
-            f"{summary['platforms']['facebook']['ayah_key']} | "
-            f"{fb_post_colored} | {fb_date} | "
-            f"{summary['platforms']['youtube']['ayah_key']} | "
-            f"{yt_post_colored} | {yt_date} | "
-            f"[View]({link}) |\n"
-        )
-
-    # Add API status section
-    report += "\n### API Status\n\n"
-    
-    for platform in ["instagram", "facebook", "youtube"]:
-        report += f"**{platform.upper()}:**\n"
-        if api_summary[platform]:
-            latest_api = list(api_summary[platform].values())[-1]
-            status = format_status(latest_api.get("status"))
-            token_status = latest_api.get("token_status", "unknown")
-            token_expires = latest_api.get("token_expires_at", "")
-            
-            if token_expires:
-                token_exp_label = to_ist_label(token_expires)
-                report += f"- Status: **{status}** | Token: **{token_status}** | Expires: **{token_exp_label}**\n"
-            else:
-                report += f"- Status: **{status}** | Token: **{token_status}**\n"
+        # Determine overall row status for filtering
+        statuses = [ig_status, fb_status, yt_status]
+        if "failed" in statuses:
+            row_filter = "failed"
+        elif all(s == "success" for s in statuses):
+            row_filter = "success"
         else:
-            report += f"- Status: **NO DATA**\n"
-    
-    return report
+            row_filter = "other"
+
+        hidden = ' style="display:none"' if idx >= 3 else ""
+        rows_html += f'''<tr class="data-row" data-filter="{row_filter}" data-idx="{idx}"{hidden}>
+<td class="run-num">#{run_number}</td>
+<td class="ayah">{ig["ayah_key"]}</td>
+<td><span class="badge {ig_status}">{ig_status.upper()}</span></td>
+<td class="date">{ig_date}</td>
+<td class="link-cell">{_link_icon(ig_url, "Instagram")}</td>
+<td class="ayah">{fb["ayah_key"]}</td>
+<td><span class="badge {fb_status}">{fb_status.upper()}</span></td>
+<td class="date">{fb_date}</td>
+<td class="link-cell">{_link_icon(fb_url, "Facebook")}</td>
+<td class="ayah">{yt["ayah_key"]}</td>
+<td><span class="badge {yt_status}">{yt_status.upper()}</span></td>
+<td class="date">{yt_date}</td>
+<td class="link-cell">{_link_icon(yt_url, "YouTube")}</td>
+<td class="link-cell"><a href="{link}" target="_blank" rel="noopener" class="run-link" title="View workflow run">View</a></td>
+</tr>
+'''
+
+    total_runs = min(len(runs), 10)
+    show_more_btn = ""
+    if total_runs > 3:
+        show_more_btn = f'''<div class="show-more-wrap">
+<button class="show-more-btn" onclick="toggleRows('{section_id}', this)" data-expanded="false">
+Show more ({total_runs - 3} more runs)
+</button>
+</div>'''
+
+    return f'''<div class="repo-section" id="{section_id}">
+<h2>
+    <span class="repo-title">{display_name}</span>
+</h2>
+<div class="filter-bar">
+    <button class="filter-btn active" onclick="filterRows('{section_id}', 'all', this)">All</button>
+    <button class="filter-btn filter-success" onclick="filterRows('{section_id}', 'success', this)">Success</button>
+    <button class="filter-btn filter-failed" onclick="filterRows('{section_id}', 'failed', this)">Failed</button>
+    <button class="filter-btn filter-other" onclick="filterRows('{section_id}', 'other', this)">Other</button>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+    <th class="col-run" rowspan="2">Run</th>
+    <th class="col-ig" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="ig{section_id}" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="url(#ig{section_id})" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="url(#ig{section_id})" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#ig{section_id})"/></svg> Instagram</th>
+    <th class="col-fb" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.875v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg> Facebook</th>
+    <th class="col-yt" colspan="4"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/><path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/></svg> YouTube</th>
+    <th class="col-actions" rowspan="2">Run</th>
+</tr>
+<tr>
+    <th class="col-ig sub">Ayah</th><th class="col-ig sub">Status</th><th class="col-ig sub">Date</th><th class="col-ig sub">Link</th>
+    <th class="col-fb sub">Ayah</th><th class="col-fb sub">Status</th><th class="col-fb sub">Date</th><th class="col-fb sub">Link</th>
+    <th class="col-yt sub">Ayah</th><th class="col-yt sub">Status</th><th class="col-yt sub">Date</th><th class="col-yt sub">Link</th>
+</tr>
+</thead>
+<tbody>
+{rows_html}
+</tbody>
+</table>
+</div>
+{show_more_btn}
+</div>
+'''
 
 
 def _mqq_status_cell(platform: dict) -> str:
     status = (platform.get("status") or "unknown").lower()
     label = {"success": "SUCCESS", "failed": "FAILED", "skipped": "SKIPPED"}.get(status, "UNKNOWN")
-    return f'<span class="{status}">{label}</span>'
+    return f'<span class="badge {status}">{label}</span>'
 
 
-def _mqq_link_cell(platform: dict, label: str) -> str:
+def _mqq_link_cell(platform: dict) -> str:
     url = platform.get("url")
     if url:
-        return f"[{label}]({url})"
+        return f'<a href="{url}" target="_blank" rel="noopener" class="post-link">&#x1F517;</a>'
     return "-"
 
 
@@ -469,30 +454,27 @@ def _mqq_token_cell(platform: dict) -> str:
         except Exception:
             tag = "unknown"
             exp_str = f"exp: {expires[:10]}"
-        return f'<span class="{tag}">{status} ({exp_str})</span>'
+        return f'<span class="badge {tag}">{status} ({exp_str})</span>'
     tag = "success" if status == "valid" else ("failed" if status == "invalid" else "unknown")
-    return f'<span class="{tag}">{status}</span>'
+    return f'<span class="badge {tag}">{status}</span>'
 
 
-def generate_mqq_reel_report() -> str:
+def generate_mqq_reel_html() -> str:
     if not MQQ_POST_LOG.exists():
-        return "\n## My Quran Quest (Word Reels)\n\nNo post log found. Run autopost_sample_reels.py first.\n"
+        return '<div class="repo-section"><h2>My Quran Quest (Word Reels)</h2><p class="no-data">No post log found.</p></div>'
 
     try:
         entries: List[Dict] = json.loads(MQQ_POST_LOG.read_text(encoding="utf-8"))
     except Exception as exc:
-        return f"\n## My Quran Quest (Word Reels)\n\nFailed to read post log: {exc}\n"
+        return f'<div class="repo-section"><h2>My Quran Quest (Word Reels)</h2><p class="no-data">Failed to read post log: {exc}</p></div>'
 
     if not entries:
-        return "\n## My Quran Quest (Word Reels)\n\nPost log is empty.\n"
+        return '<div class="repo-section"><h2>My Quran Quest (Word Reels)</h2><p class="no-data">Post log is empty.</p></div>'
 
     recent = list(reversed(entries[-20:]))
 
-    report = "\n## My Quran Quest (Word Reels)\n\n"
-    report += "| Date | Rank | Word | IG | FB | YT | IG Link | FB Link | YT Link | YT Token |\n"
-    report += "|------|-----:|------|----|----|----|---------|---------|---------|-----------|\n"
-
-    for entry in recent:
+    rows = ""
+    for idx, entry in enumerate(recent):
         date = entry.get("date", "?")
         rank = entry.get("rank", "?")
         arabic = entry.get("arabic", "")
@@ -504,362 +486,341 @@ def generate_mqq_reel_report() -> str:
         fb = entry.get("facebook") or {}
         yt = entry.get("youtube") or {}
 
-        report += (
-            f"| {date} | {rank} | {word_cell} | "
-            f"{_mqq_status_cell(ig)} | {_mqq_status_cell(fb)} | {_mqq_status_cell(yt)} | "
-            f"{_mqq_link_cell(ig, 'IG')} | {_mqq_link_cell(fb, 'FB')} | {_mqq_link_cell(yt, 'YT')} | "
-            f"{_mqq_token_cell(yt)} |\n"
-        )
+        hidden = ' style="display:none"' if idx >= 3 else ""
+        rows += f'''<tr class="data-row" data-idx="{idx}"{hidden}>
+<td>{date}</td><td class="run-num">{rank}</td><td class="ayah">{word_cell}</td>
+<td>{_mqq_status_cell(ig)}</td><td>{_mqq_status_cell(fb)}</td><td>{_mqq_status_cell(yt)}</td>
+<td class="link-cell">{_mqq_link_cell(ig)}</td><td class="link-cell">{_mqq_link_cell(fb)}</td><td class="link-cell">{_mqq_link_cell(yt)}</td>
+<td>{_mqq_token_cell(yt)}</td>
+</tr>
+'''
 
-    # Token status summary
-    last = entries[-1]
-    ig_last = last.get("instagram") or {}
-    fb_last = last.get("facebook") or {}
-    yt_last = last.get("youtube") or {}
+    total = len(recent)
+    show_more = ""
+    if total > 3:
+        show_more = f'''<div class="show-more-wrap">
+<button class="show-more-btn" onclick="toggleRows('mqq-section', this)" data-expanded="false">
+Show more ({total - 3} more entries)
+</button>
+</div>'''
 
-    report += "\n### Token Status (last post)\n\n"
-    report += f"**INSTAGRAM:** {_mqq_token_cell({'token_status': ig_last.get('token_status', 'unknown')})}\n\n"
-    report += f"**FACEBOOK:** {_mqq_token_cell({'token_status': fb_last.get('token_status', 'unknown')})}\n\n"
-    report += f"**YOUTUBE:** {_mqq_token_cell(yt_last)}\n"
-
-    return report
-
-
-def generate_full_report():
-    report = f"Generated: {now_utc().strftime('%Y-%m-%d %H:%M UTC')}\n\n"
-
-    for repo in REPOS:
-        report += generate_repo_report(repo)
-
-    report += generate_mqq_reel_report()
-
-    return report
-
-
-def markdown_to_html(md: str):
-    import markdown
-
-    body = markdown.markdown(md, extensions=["tables"])
-    return """
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            * {{
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }}
-            body {{
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-                color: #e2e8f0;
-                padding: 20px;
-                min-height: 100vh;
-            }}
-            .container {{
-                max-width: 1400px;
-                margin: 0 auto;
-            }}
-            h2 {{
-                color: #60a5fa;
-                margin: 30px 0 15px 0;
-                padding: 15px;
-                background: rgba(30, 41, 59, 0.8);
-                border-left: 4px solid #3b82f6;
-                border-radius: 4px;
-                font-size: clamp(1.3em, 5vw, 1.8em);
-            }}
-            h3 {{
-                color: #93c5fd;
-                margin: 20px 0 10px 0;
-                font-size: clamp(1em, 4vw, 1.2em);
-                padding: 10px 15px;
-                background: rgba(30, 41, 59, 0.6);
-                border-radius: 4px;
-            }}
-            .table-wrapper {{
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                margin: 15px 0;
-                width: 100%;
-            }}
-            table {{
-                border-collapse: collapse;
-                width: 100%;
-                min-width: 100%;
-                font-size: clamp(0.75em, 2vw, 0.9em);
-                background: rgba(30, 41, 59, 0.9);
-                border-radius: 8px;
-                overflow: visible;
-            }}
-            th {{
-                color: #ffffff;
-                padding: clamp(8px, 2vw, 14px);
-                text-align: left;
-                font-weight: 700;
-                border-bottom: 2px solid #3b82f6;
-                white-space: nowrap;
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-            }}
-            /* Instagram header (cols 2-4) */
-            th:nth-child(2), th:nth-child(3), th:nth-child(4) {{
-                background: linear-gradient(135deg, #DA88B3 0%, #C8739E 100%);
-                border-right: 1px solid rgba(218, 136, 179, 0.3);
-            }}
-
-            /* Facebook header (cols 5-7) */
-            th:nth-child(5), th:nth-child(6), th:nth-child(7) {{
-                background: linear-gradient(135deg, #6BA3E5 0%, #5A8FD1 100%);
-                border-right: 1px solid rgba(107, 163, 229, 0.3);
-            }}
-
-            /* YouTube header (cols 8-10) */
-            th:nth-child(8), th:nth-child(9), th:nth-child(10) {{
-                background: linear-gradient(135deg, #FF7F7F 0%, #E85555 100%);
-                border-right: 1px solid rgba(255, 127, 127, 0.3);
-            }}
-
-            /* Run # header (col 1 only) */
-            th:nth-child(1) {{
-                background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-                border-right: 2px solid rgba(255,255,255,0.2);
-            }}
-
-            /* Link header (col 11) */
-            th:nth-child(11) {{
-                background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-                border-left: 2px solid rgba(255,255,255,0.2);
-            }}
-
-            td {{
-                padding: clamp(8px, 2vw, 12px);
-                border-bottom: 1px solid #334155;
-            }}
-
-            /* Instagram cells (cols 2-4) */
-            td:nth-child(2), td:nth-child(3), td:nth-child(4) {{
-                background: rgba(218, 136, 179, 0.06);
-                border-right: 1px solid rgba(218, 136, 179, 0.15);
-            }}
-
-            /* Facebook cells (cols 5-7) */
-            td:nth-child(5), td:nth-child(6), td:nth-child(7) {{
-                background: rgba(107, 163, 229, 0.06);
-                border-right: 1px solid rgba(107, 163, 229, 0.15);
-            }}
-
-            /* YouTube cells (cols 8-10) */
-            td:nth-child(8), td:nth-child(9), td:nth-child(10) {{
-                background: rgba(255, 127, 127, 0.06);
-                border-right: 1px solid rgba(255, 127, 127, 0.15);
-            }}
-
-            /* Hover effects */
-            tr:hover td:nth-child(2),
-            tr:hover td:nth-child(3),
-            tr:hover td:nth-child(4) {{
-                background: rgba(218, 136, 179, 0.12);
-            }}
-
-            tr:hover td:nth-child(5),
-            tr:hover td:nth-child(6),
-            tr:hover td:nth-child(7) {{
-                background: rgba(107, 163, 229, 0.12);
-            }}
-
-            tr:hover td:nth-child(8),
-            tr:hover td:nth-child(9),
-            tr:hover td:nth-child(10) {{
-                background: rgba(255, 127, 127, 0.12);
-            }}
-
-            tr:last-child td {{
-                border-bottom: none;
-            }}
-            a {{
-                color: #60a5fa;
-                text-decoration: none;
-                font-weight: 500;
-                padding: 4px 8px;
-                border-radius: 3px;
-                background: rgba(96, 165, 250, 0.1);
-                transition: all 0.2s ease;
-            }}
-            a:hover {{
-                color: #93c5fd;
-                background: rgba(96, 165, 250, 0.2);
-            }}
-            .success {{
-                color: #86efac;
-                font-weight: 700;
-                background: rgba(134, 239, 172, 0.15);
-                padding: 4px 8px;
-                border-radius: 3px;
-                display: inline-block;
-            }}
-            .failed {{
-                color: #f87171;
-                font-weight: 700;
-                background: rgba(248, 113, 113, 0.15);
-                padding: 4px 8px;
-                border-radius: 3px;
-                display: inline-block;
-            }}
-            .unknown {{
-                color: #fbbf24;
-                font-weight: 700;
-                background: rgba(251, 191, 36, 0.15);
-                padding: 4px 8px;
-                border-radius: 3px;
-                display: inline-block;
-            }}
-            .skipped {{
-                color: #94a3b8;
-                font-weight: 700;
-                background: rgba(148, 163, 184, 0.15);
-                padding: 4px 8px;
-                border-radius: 3px;
-                display: inline-block;
-            }}
-            .api-section {{
-                background: rgba(30, 41, 59, 0.8);
-                padding: 15px;
-                margin: 15px 0;
-                border-radius: 8px;
-                border-left: 4px solid #8b5cf6;
-            }}
-            .api-section strong {{
-                color: #a78bfa;
-            }}
-            .header {{
-                text-align: center;
-                margin-bottom: 30px;
-            }}
-            .header h1 {{
-                color: #60a5fa;
-                margin-bottom: 10px;
-                font-size: clamp(1.8em, 8vw, 2.5em);
-            }}
-            .header p {{
-                color: #94a3b8;
-                font-size: clamp(0.9em, 3vw, 1.1em);
-            }}
-            /* Mobile responsive */
-            @media (max-width: 1200px) {{
-                .table-wrapper {{
-                    overflow-x: auto;
-                    -webkit-overflow-scrolling: touch;
-                }}
-            }}
-            @media (max-width: 768px) {{
-                body {{
-                    padding: 12px;
-                }}
-                .container {{
-                    padding: 0;
-                    max-width: 100%;
-                }}
-                table {{
-                    font-size: 0.7em;
-                    min-width: 100%;
-                }}
-                th, td {{
-                    padding: 6px 4px;
-                }}
-                th {{
-                    white-space: nowrap;
-                    font-size: 0.85em;
-                }}
-                h2 {{
-                    margin: 15px 0 10px 0;
-                    padding: 10px;
-                    font-size: 1.1em;
-                }}
-                h3 {{
-                    font-size: 0.95em;
-                    margin: 10px 0 8px 0;
-                }}
-                .api-section {{
-                    padding: 10px;
-                    margin: 10px 0;
-                    font-size: 0.8em;
-                }}
-                .header h1 {{
-                    font-size: 1.6em;
-                }}
-                .header p {{
-                    font-size: 0.9em;
-                }}
-            }}
-            @media (max-width: 480px) {{
-                body {{
-                    padding: 8px;
-                }}
-                .container {{
-                    max-width: 100%;
-                }}
-                table {{
-                    font-size: 0.6em;
-                }}
-                th, td {{
-                    padding: 4px 3px;
-                }}
-                .header h1 {{
-                    font-size: 1.3em;
-                    margin-bottom: 5px;
-                }}
-                .header p {{
-                    font-size: 0.75em;
-                }}
-                .success, .failed, .unknown, .skipped {{
-                    padding: 2px 3px;
-                    font-size: 0.65em;
-                }}
-                h2 {{
-                    font-size: 1em;
-                    padding: 8px;
-                    margin: 10px 0 8px 0;
-                }}
-                h3 {{
-                    font-size: 0.85em;
-                    margin: 8px 0 5px 0;
-                }}
-                a {{
-                    padding: 2px 4px;
-                    font-size: 0.85em;
-                }}
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>Daily Upload Report</h1>
-                <p>Quran Upload Automation Status</p>
-            </div>
-            {body}
-        </div>
-    </body>
-    </html>
-    """.format(body=body)
+    return f'''<div class="repo-section" id="mqq-section">
+<h2>My Quran Quest (Word Reels)</h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+    <th>Date</th><th>Rank</th><th>Word</th>
+    <th><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><defs><radialGradient id="igmqq" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="url(#igmqq)" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="url(#igmqq)" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#igmqq)"/></svg> IG</th>
+    <th><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.875v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg> FB</th>
+    <th><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/><path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/></svg> YT</th>
+    <th>IG Link</th><th>FB Link</th><th>YT Link</th>
+    <th>YT Token</th>
+</tr>
+</thead>
+<tbody>
+{rows}
+</tbody>
+</table>
+</div>
+{show_more}
+</div>
+'''
 
 
-def save_report(report: str):
+def generate_html_report():
+    generated_at = now_utc().strftime("%Y-%m-%d %H:%M UTC")
+
+    sections = ""
+    for i, repo in enumerate(REPOS):
+        sections += generate_repo_html(repo, f"repo-{i}")
+
+    sections += generate_mqq_reel_html()
+
+    return f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Upload Report</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            min-height: 100vh;
+        }}
+        .container {{ max-width: 1400px; margin: 0 auto; }}
+
+        /* Header */
+        .header {{
+            text-align: center;
+            padding: 30px 20px 20px;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1));
+            border-radius: 16px;
+            border: 1px solid rgba(59,130,246,0.2);
+        }}
+        .header h1 {{
+            color: #f1f5f9;
+            font-size: clamp(1.6em, 5vw, 2.2em);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }}
+        .header .subtitle {{
+            color: #94a3b8;
+            font-size: clamp(0.85em, 2.5vw, 1em);
+            margin-top: 6px;
+        }}
+        .header .generated {{
+            color: #64748b;
+            font-size: 0.8em;
+            margin-top: 8px;
+        }}
+
+        /* Repo sections */
+        .repo-section {{
+            margin-bottom: 32px;
+            background: rgba(30,41,59,0.6);
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid rgba(51,65,85,0.5);
+        }}
+        .repo-section h2 {{
+            padding: 16px 20px;
+            font-size: clamp(1.1em, 3vw, 1.4em);
+            font-weight: 600;
+            color: #f1f5f9;
+            background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(30,41,59,0.7));
+            border-bottom: 1px solid rgba(51,65,85,0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
+        .no-data {{
+            padding: 24px;
+            color: #64748b;
+            text-align: center;
+        }}
+
+        /* Filter bar */
+        .filter-bar {{
+            display: flex;
+            gap: 6px;
+            padding: 12px 20px;
+            background: rgba(15,23,42,0.5);
+            border-bottom: 1px solid rgba(51,65,85,0.4);
+            flex-wrap: wrap;
+        }}
+        .filter-btn {{
+            padding: 5px 14px;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 0.8em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }}
+        .filter-btn:hover {{ background: rgba(51,65,85,0.5); color: #e2e8f0; }}
+        .filter-btn.active {{ background: #334155; color: #f1f5f9; border-color: #475569; }}
+        .filter-success.active {{ background: rgba(34,197,94,0.2); color: #86efac; border-color: rgba(34,197,94,0.4); }}
+        .filter-failed.active {{ background: rgba(239,68,68,0.2); color: #fca5a5; border-color: rgba(239,68,68,0.4); }}
+        .filter-other.active {{ background: rgba(234,179,8,0.2); color: #fde047; border-color: rgba(234,179,8,0.4); }}
+
+        /* Table */
+        .table-wrapper {{
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: clamp(0.72em, 1.8vw, 0.85em);
+        }}
+        thead tr:first-child th {{
+            padding: 10px 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75em;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #334155;
+            white-space: nowrap;
+        }}
+        thead tr:nth-child(2) th {{
+            padding: 6px 8px;
+            font-weight: 600;
+            font-size: 0.7em;
+            color: #94a3b8;
+            border-bottom: 1px solid #334155;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }}
+        th.sub {{ font-weight: 500; }}
+
+        /* Platform column colors */
+        .col-run {{ background: rgba(15,23,42,0.5); color: #94a3b8; }}
+        .col-actions {{ background: rgba(15,23,42,0.5); color: #94a3b8; }}
+
+        .col-ig {{ background: linear-gradient(135deg, rgba(214,36,159,0.18), rgba(253,89,73,0.12)); color: #f9a8d4; }}
+        .col-fb {{ background: linear-gradient(135deg, rgba(24,119,242,0.18), rgba(24,119,242,0.1)); color: #93c5fd; }}
+        .col-yt {{ background: linear-gradient(135deg, rgba(255,0,0,0.15), rgba(255,0,0,0.08)); color: #fca5a5; }}
+
+        td {{ padding: 10px 8px; border-bottom: 1px solid rgba(51,65,85,0.4); }}
+        tr:last-child td {{ border-bottom: none; }}
+
+        /* Subtle platform row tints */
+        td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5) {{
+            background: rgba(214,36,159,0.04);
+        }}
+        td:nth-child(6), td:nth-child(7), td:nth-child(8), td:nth-child(9) {{
+            background: rgba(24,119,242,0.04);
+        }}
+        td:nth-child(10), td:nth-child(11), td:nth-child(12), td:nth-child(13) {{
+            background: rgba(255,0,0,0.04);
+        }}
+        tr:hover td {{ background: rgba(51,65,85,0.25) !important; }}
+
+        .run-num {{ font-weight: 600; color: #94a3b8; white-space: nowrap; }}
+        .ayah {{ font-weight: 600; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }}
+        .date {{ color: #94a3b8; white-space: nowrap; font-size: 0.9em; }}
+        .link-cell {{ text-align: center; }}
+
+        /* Status badges */
+        .badge {{
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.78em;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }}
+        .badge.success {{ color: #86efac; background: rgba(34,197,94,0.15); }}
+        .badge.failed {{ color: #fca5a5; background: rgba(239,68,68,0.15); }}
+        .badge.unknown {{ color: #fde047; background: rgba(234,179,8,0.12); }}
+        .badge.skipped {{ color: #94a3b8; background: rgba(148,163,184,0.12); }}
+
+        /* Links */
+        a {{ color: #60a5fa; text-decoration: none; transition: color 0.15s; }}
+        a:hover {{ color: #93c5fd; }}
+        .post-link {{ font-size: 1.1em; }}
+        .run-link {{
+            padding: 3px 10px;
+            border-radius: 4px;
+            background: rgba(59,130,246,0.12);
+            font-size: 0.85em;
+            font-weight: 500;
+        }}
+        .run-link:hover {{ background: rgba(59,130,246,0.25); }}
+
+        /* Show more */
+        .show-more-wrap {{ padding: 12px 20px; text-align: center; border-top: 1px solid rgba(51,65,85,0.3); }}
+        .show-more-btn {{
+            padding: 7px 20px;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            background: rgba(51,65,85,0.3);
+            color: #94a3b8;
+            font-size: 0.82em;
+            cursor: pointer;
+            transition: all 0.15s;
+        }}
+        .show-more-btn:hover {{ background: rgba(51,65,85,0.5); color: #e2e8f0; }}
+
+        /* Icon alignment */
+        .icon {{ vertical-align: middle; margin-right: 4px; }}
+
+        /* Mobile */
+        @media (max-width: 768px) {{
+            body {{ padding: 10px; }}
+            .header {{ padding: 20px 12px 14px; margin-bottom: 16px; }}
+            .filter-bar {{ padding: 8px 12px; }}
+            .filter-btn {{ padding: 4px 10px; font-size: 0.75em; }}
+            .repo-section h2 {{ padding: 12px 14px; font-size: 1em; }}
+            table {{ font-size: 0.68em; }}
+            td, th {{ padding: 6px 4px; }}
+            .badge {{ padding: 2px 5px; font-size: 0.7em; }}
+            .show-more-wrap {{ padding: 8px 12px; }}
+        }}
+        @media (max-width: 480px) {{
+            body {{ padding: 6px; }}
+            table {{ font-size: 0.6em; }}
+            td, th {{ padding: 4px 3px; }}
+            .badge {{ padding: 1px 3px; font-size: 0.65em; }}
+        }}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Daily Upload Report</h1>
+        <div class="subtitle">Quran Upload Automation Status</div>
+        <div class="generated">Generated: {generated_at}</div>
+    </div>
+    {sections}
+</div>
+<script>
+function toggleRows(sectionId, btn) {{
+    const section = document.getElementById(sectionId);
+    const rows = section.querySelectorAll('.data-row');
+    const expanded = btn.dataset.expanded === 'true';
+
+    rows.forEach(row => {{
+        const idx = parseInt(row.dataset.idx);
+        if (idx >= 3) {{
+            row.style.display = expanded ? 'none' : '';
+        }}
+    }});
+
+    btn.dataset.expanded = expanded ? 'false' : 'true';
+    if (expanded) {{
+        const total = rows.length;
+        btn.textContent = 'Show more (' + (total - 3) + ' more runs)';
+    }} else {{
+        btn.textContent = 'Show less';
+    }}
+}}
+
+function filterRows(sectionId, filter, btn) {{
+    const section = document.getElementById(sectionId);
+    const rows = section.querySelectorAll('.data-row');
+    const showMoreBtn = section.querySelector('.show-more-btn');
+
+    // Update active button
+    section.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Reset show-more state
+    if (showMoreBtn) {{
+        showMoreBtn.dataset.expanded = 'true';
+        showMoreBtn.textContent = 'Show less';
+    }}
+
+    rows.forEach(row => {{
+        if (filter === 'all' || row.dataset.filter === filter) {{
+            row.style.display = '';
+        }} else {{
+            row.style.display = 'none';
+        }}
+    }});
+}}
+</script>
+</body>
+</html>'''
+
+
+def save_report():
     os.makedirs("site", exist_ok=True)
-    html = markdown_to_html(report)
-    # Wrap ALL tables in scrollable container
-    html = html.replace('<table>', '<div class="table-wrapper"><table>')
-    html = html.replace('</table>', '</table></div>')
-    with open("site/index.html", "w", encoding="utf-8") as file_obj:
-        file_obj.write(html)
+    html = generate_html_report()
+    with open("site/index.html", "w", encoding="utf-8") as f:
+        f.write(html)
     print("HTML report generated")
 
 
 if __name__ == "__main__":
-    report = generate_full_report()
-    save_report(report)
-    print(report)
+    save_report()
