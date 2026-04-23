@@ -15,6 +15,9 @@ GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 EVENT_PREFIX = "UPLOAD_EVENT "
 IST = ZoneInfo("Asia/Kolkata")
 MQQ_POST_LOG = Path(__file__).parent / "mqq_post_log.json"
+REPORT_REPO = "gitterbug1/daily-reports"
+REPORT_WORKFLOW_FILE = "multi-repo-daily-report.yml"
+REPORT_WORKFLOW_URL = f"https://github.com/{REPORT_REPO}/actions/workflows/{REPORT_WORKFLOW_FILE}"
 
 REPOS = [
     "iwilllearnquran/learnqurandaily",
@@ -57,6 +60,20 @@ def get_workflow_runs(repo: str, hours: int = 48) -> List[Dict]:
     except Exception as exc:
         print(f"Error fetching runs for {repo}: {exc}")
         return []
+
+
+def get_latest_workflow_run(repo: str, workflow_file: str) -> Dict:
+    url = f"https://api.github.com/repos/{repo}/actions/workflows/{workflow_file}/runs"
+    params = {"per_page": 1}
+
+    try:
+        response = requests.get(url, headers=headers, params=params, timeout=15)
+        response.raise_for_status()
+        runs = response.json().get("workflow_runs", [])
+        return runs[0] if runs else {}
+    except Exception as exc:
+        print(f"Error fetching latest workflow run for {repo}/{workflow_file}: {exc}")
+        return {}
 
 
 def get_jobs_for_run(repo: str, run_id: int) -> List[Dict]:
@@ -303,6 +320,53 @@ def format_status(status: str | None) -> str:
 
 def _status_class(status: str | None) -> str:
     return (status or "unknown").lower()
+
+
+def _workflow_status_meta(run: Dict) -> Dict[str, str]:
+    if not run:
+        return {
+            "status_class": "unknown",
+            "label": "UNKNOWN",
+            "meta": "No workflow runs found yet",
+            "url": REPORT_WORKFLOW_URL,
+        }
+
+    status = (run.get("status") or "unknown").lower()
+    conclusion = (run.get("conclusion") or "").lower()
+
+    if status in {"queued", "in_progress", "waiting", "requested", "pending"}:
+        status_class = "running"
+        label = status.replace("_", " ").upper()
+    elif conclusion:
+        status_class = {
+            "success": "success",
+            "failure": "failed",
+            "cancelled": "failed",
+            "timed_out": "failed",
+            "skipped": "skipped",
+        }.get(conclusion, "unknown")
+        label = {
+            "failure": "FAILED",
+            "cancelled": "CANCELLED",
+            "timed_out": "TIMED OUT",
+            "skipped": "SKIPPED",
+            "success": "SUCCESS",
+        }.get(conclusion, conclusion.upper())
+    else:
+        status_class = "unknown"
+        label = status.upper()
+
+    updated_at = run.get("updated_at") or run.get("created_at")
+    when = to_ist_label(updated_at)
+    run_number = run.get("run_number")
+    meta = f"Run #{run_number} · {when}" if run_number else when
+
+    return {
+        "status_class": status_class,
+        "label": label,
+        "meta": meta,
+        "url": run.get("html_url") or REPORT_WORKFLOW_URL,
+    }
 
 
 def _ayah_cell(ayah_key: str, url: str | None) -> str:
@@ -554,6 +618,7 @@ Show more ({total - 3} more entries)
 
 def generate_html_report():
     generated_at = now_utc().strftime("%Y-%m-%d %H:%M UTC")
+    latest_report_run = _workflow_status_meta(get_latest_workflow_run(REPORT_REPO, REPORT_WORKFLOW_FILE))
 
     sections = ""
     for i, repo in enumerate(REPOS):
@@ -602,6 +667,48 @@ def generate_html_report():
             color: #64748b;
             font-size: 0.8em;
             margin-top: 8px;
+        }}
+        .header-actions {{
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }}
+        .action-btn {{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(96,165,250,0.35);
+            background: rgba(30,41,59,0.7);
+            color: #e2e8f0;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+        }}
+        .action-btn:hover {{
+            background: rgba(59,130,246,0.18);
+            border-color: rgba(96,165,250,0.65);
+            color: #f8fafc;
+            transform: translateY(-1px);
+        }}
+        .action-btn.primary {{
+            background: linear-gradient(135deg, rgba(59,130,246,0.24), rgba(139,92,246,0.18));
+        }}
+        .workflow-status {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            color: #94a3b8;
+            font-size: 0.82em;
+        }}
+        .workflow-status .meta {{
+            color: #64748b;
         }}
 
         /* Repo sections */
@@ -725,6 +832,7 @@ def generate_html_report():
             white-space: nowrap;
         }}
         .badge.success {{ color: #86efac; background: rgba(34,197,94,0.15); }}
+        .badge.running {{ color: #fde68a; background: rgba(245,158,11,0.16); }}
         .badge.failed {{ color: #fca5a5; background: rgba(239,68,68,0.15); }}
         .badge.unknown {{ color: #fde047; background: rgba(234,179,8,0.12); }}
         .badge.skipped {{ color: #94a3b8; background: rgba(148,163,184,0.12); }}
@@ -794,6 +902,15 @@ def generate_html_report():
         <h1>Daily Upload Report</h1>
         <div class="subtitle">Quran Upload Automation Status</div>
         <div class="generated">Generated: {generated_at}</div>
+        <div class="header-actions">
+            <a class="action-btn primary" href="{REPORT_WORKFLOW_URL}" target="_blank" rel="noopener">Run workflow</a>
+            <a class="action-btn" href="{latest_report_run['url']}" target="_blank" rel="noopener">Latest run</a>
+        </div>
+        <div class="workflow-status">
+            <span>Report workflow</span>
+            <span class="badge {latest_report_run['status_class']}">{latest_report_run['label']}</span>
+            <span class="meta">{latest_report_run['meta']}</span>
+        </div>
     </div>
     {sections}
 </div>
